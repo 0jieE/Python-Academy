@@ -1,0 +1,37 @@
+## Idea
+
+Greedy — always take the largest coin that fits — is wrong for arbitrary coin
+values: with coins `1, 3, 4` and `X = 6` it takes `4 + 1 + 1` (3 coins), but
+`3 + 3` uses 2. We need dynamic programming.
+
+**State:** `best[s]` = fewest coins that add up to exactly `s`.
+
+**Transition:** the last coin used was some `c ≤ s`, and before it we made
+`s − c` as cheaply as possible:
+
+```text
+best[s] = 1 + min(best[s - c] for every coin c ≤ s)
+```
+
+**Base case:** `best[0] = 0`. Amounts that can't be made stay at "infinity";
+if `best[X]` is still infinity at the end, print `-1`.
+
+Filling `s = 1 … X` in increasing order guarantees `best[s − c]` is ready
+when we need it.
+
+```python
+def main():
+    n, x = map(int, input().split())
+    coins = list(map(int, input().split()))
+    INF = float("inf")
+    best = [0] + [INF] * x
+    for s in range(1, x + 1):
+        for c in coins:
+            if c <= s and best[s - c] + 1 < best[s]:
+                best[s] = best[s - c] + 1
+    print(best[x] if best[x] != INF else -1)
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N · X)" space="O(X)" /> — at most `100 · 10^4 = 10^6` steps.

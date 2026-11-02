@@ -1,0 +1,50 @@
+## Idea
+
+Think of every open cell as a node of a graph, with an edge to each open
+neighbour. All edges have the same length (one move), so **BFS** from `S`
+finds the shortest distance to every cell: it visits all cells at distance 1,
+then all at distance 2, and so on.
+
+- Keep `dist[r][c] = -1` for cells not reached yet.
+- Put `S` in a `deque` with distance 0.
+- Pop a cell, look at its 4 neighbours; every open, unvisited neighbour gets
+  `dist + 1` and joins the queue.
+- When `E` is reached, its distance is the answer. If the queue runs out
+  first, print `-1`.
+
+Mark cells when they **enter** the queue. Marking them when they leave lets the
+same cell be queued many times, which can be very slow on a big open grid.
+
+For a `1000 × 1000` grid a flat list (`index = r * C + c`) is faster than a
+list of lists, but the 2D version below is easier to read and fits the limits.
+
+```python
+import sys
+from collections import deque
+
+def main():
+    data = sys.stdin.read().split()
+    rows, cols = int(data[0]), int(data[1])
+    grid = data[2:2 + rows]
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == "S":
+                start = (r, c)
+    dist = [[-1] * cols for _ in range(rows)]
+    dist[start[0]][start[1]] = 0
+    queue = deque([start])
+    while queue:
+        r, c = queue.popleft()
+        if grid[r][c] == "E":
+            print(dist[r][c])
+            return
+        for nr, nc in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] != "#" and dist[nr][nc] == -1:
+                dist[nr][nc] = dist[r][c] + 1
+                queue.append((nr, nc))
+    print(-1)
+
+main()
+```
+
+**Complexity:** <Complexity time="O(R · C)" space="O(R · C)" /> — every cell enters the queue at most once.

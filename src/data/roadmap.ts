@@ -57,7 +57,7 @@ export const roadmap: RoadmapStage[] = [
   },
   {
     id: 'stage-3',
-    title: 'Stage 3 · Next level (after V1)',
+    title: 'Stage 3 · Next level',
     description: 'Graphs and dynamic programming.',
     level: 'advanced',
     items: [{ id: 'algo-bfs-dfs', title: 'BFS and DFS' }, { id: 'algo-dp-intro', title: 'Dynamic Programming' }],

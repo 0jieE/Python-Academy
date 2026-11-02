@@ -1,0 +1,43 @@
+## Idea
+
+**State:** `ways[i]` = number of ways to stand exactly on step `i`.
+
+**Transition:** the last move onto step `i` came from step `i − 1`, `i − 2` or
+`i − 3`, and those cases never overlap, so
+
+```text
+ways[i] = ways[i - 1] + ways[i - 2] + ways[i - 3]
+```
+
+**Base case:** `ways[0] = 1` — standing at the bottom, there is exactly one way
+(do nothing). Steps below 0 contribute 0.
+
+Fill the table from the bottom up. Applying `% MOD` at every step keeps the
+numbers small; without it, `ways[10^5]` would have thousands of digits.
+
+A recursive version with `@cache` gives the same answer, but needs recursion
+depth `N = 10^5` — the loop avoids that.
+
+```python
+MOD = 10 ** 9 + 7
+
+def main():
+    n = int(input())
+    ways = [0] * (n + 1)
+    ways[0] = 1
+    for i in range(1, n + 1):
+        total = ways[i - 1]
+        if i >= 2:
+            total += ways[i - 2]
+        if i >= 3:
+            total += ways[i - 3]
+        ways[i] = total % MOD
+    print(ways[n])
+
+main()
+```
+
+Only the last three values are ever used, so three variables would do — but
+the table is easier to read and `10^5` entries are cheap.
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" />

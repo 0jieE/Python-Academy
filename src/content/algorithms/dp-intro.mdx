@@ -1,0 +1,236 @@
+---
+id: algo-dp-intro
+slug: dp-intro
+title: Dynamic Programming
+summary: Solve big problems from the answers to smaller ones — states, transitions, memoization and bottom-up tables.
+category: algorithms
+level: advanced
+order: 120
+prerequisites: [algo-recursion]
+learningObjectives:
+  - Describe a DP solution with a state, a transition and base cases
+  - Write it top-down with functools.cache and bottom-up with a table
+  - Solve climbing stairs, minimum-coin change and 0/1 knapsack
+  - Estimate DP cost as (number of states) × (work per state)
+tags: [dp, dynamic-programming, memoization, cache, knapsack, coin-change, stairs, table]
+practiceProblems: [stair-climb, exact-change]
+draft: false
+---
+
+## Why this matters
+
+Some problems ask for the best or the number of ways among a huge number of
+choices — far too many to try one by one. When the problem breaks into
+**overlapping smaller problems**, dynamic programming (DP) solves each small
+problem once and reuses the answer. DP shows up in almost every contest above
+the easiest level.
+
+<KeyIdea>
+Write down three things before coding: the **state** (what `dp[i]` means),
+the **transition** (how `dp[i]` comes from smaller states), and the **base
+case**. Cost = number of states × work per state.
+</KeyIdea>
+
+## Climbing stairs: the first DP
+
+How many ways are there to climb `N` steps, taking 1 or 2 at a time?
+
+- **State:** `ways[i]` = number of ways to reach step `i`.
+- **Transition:** the last move came from `i − 1` or `i − 2`:
+  `ways[i] = ways[i - 1] + ways[i - 2]`.
+- **Base case:** `ways[0] = 1`, `ways[1] = 1`.
+
+### Top-down (memoized recursion)
+
+Write the recursion exactly as the transition says, and let `@cache`
+remember each result:
+
+```python
+from functools import cache
+
+@cache
+def ways(i):
+    if i <= 1:
+        return 1
+    return ways(i - 1) + ways(i - 2)
+
+print(ways(50))   # 20365011074
+```
+
+### Bottom-up (a table)
+
+Fill the answers from small to large with a loop — no recursion depth limit,
+and usually faster in Python:
+
+<RunnableExample title="Bottom-up stairs" stdin="50">
+
+```python
+n = int(input())
+ways = [0] * (n + 1)
+ways[0] = 1
+for i in range(1, n + 1):
+    ways[i] = ways[i - 1] + (ways[i - 2] if i >= 2 else 0)
+print(ways[n])
+```
+
+</RunnableExample>
+
+Both are <Complexity time="O(N)" />. Prefer bottom-up when the recursion
+would be thousands of levels deep.
+
+## Minimum coins
+
+Coins `1, 3, 4`, amount `6`: greedy takes `4 + 1 + 1`, but `3 + 3` is better.
+DP tries every possible last coin:
+
+- **State:** `best[s]` = fewest coins that make exactly `s`.
+- **Transition:** `best[s] = 1 + min(best[s - c])` over coins `c ≤ s`.
+- **Base case:** `best[0] = 0`; impossible amounts stay at infinity.
+
+```python
+def min_coins(coins, x):
+    INF = float("inf")
+    best = [0] + [INF] * x
+    for s in range(1, x + 1):
+        for c in coins:
+            if c <= s and best[s - c] + 1 < best[s]:
+                best[s] = best[s - c] + 1
+    return best[x] if best[x] != INF else -1
+
+print(min_coins([1, 3, 4], 6))   # 2
+```
+
+`X` states × `N` coins each → <Complexity time="O(N · X)" space="O(X)" />.
+
+## 0/1 knapsack
+
+Each item has a weight and a value and can be taken **at most once**. Maximise
+the value with total weight ≤ `W`.
+
+- **State:** `dp[w]` = best value with total weight at most `w`, using the
+  items processed so far.
+- **Transition** for an item `(wt, val)`: `dp[w] = max(dp[w], dp[w - wt] + val)`.
+
+Loop the capacity **downwards**, so each item is used at most once (going
+upwards would let `dp[w - wt]` already include this same item):
+
+<RunnableExample title="0/1 knapsack" stdin={"4 7\n1 1\n3 4\n4 5\n5 7\n"}>
+
+```python
+n, cap = map(int, input().split())
+dp = [0] * (cap + 1)
+for _ in range(n):
+    wt, val = map(int, input().split())
+    for w in range(cap, wt - 1, -1):
+        dp[w] = max(dp[w], dp[w - wt] + val)
+print(dp[cap])   # items of weight 3 and 4: value 9
+```
+
+</RunnableExample>
+
+Cost: <Complexity time="O(N · W)" space="O(W)" />.
+
+## Spotting a DP problem
+
+- The question asks for a **minimum, maximum or number of ways**.
+- A brute force would try all subsets or all paths (exponential).
+- A choice at one step leaves a **smaller version** of the same problem.
+- The same smaller problems come up again and again.
+
+## Common mistakes
+
+- No clear meaning for `dp[i]` — write it down in one sentence first.
+- Wrong base case (`ways[0] = 0` instead of 1 makes every answer 0).
+- Filling the table in the wrong order, reading entries that aren't ready.
+- Looping knapsack capacity upwards (that's the *unlimited* version).
+- Forgetting `% MOD` when the answer is "modulo 10^9 + 7".
+- `@cache` with recursion depth `10^5` → `RecursionError`; switch to bottom-up.
+
+## Competition use
+
+- Start with the recursion (top-down) to get the transition right, then convert
+  to a loop if it's too deep or too slow.
+- Check states × transitions against the time budget: in Python, aim for at
+  most about `10^7` simple steps.
+- Many DP answers are huge: apply `% MOD` inside the loop.
+
+## Exercises
+
+<Exercise title="Cheapest path in a grid">
+Read `R` and `C`, then a grid of costs. Starting top-left and moving only right
+or down, print the smallest total cost to reach the bottom-right (both corners
+included).
+
+<Answer>
+
+```python
+r, c = map(int, input().split())
+g = [list(map(int, input().split())) for _ in range(r)]
+INF = float("inf")
+dp = [[INF] * c for _ in range(r)]
+dp[0][0] = g[0][0]
+for i in range(r):
+    for j in range(c):
+        if i > 0:
+            dp[i][j] = min(dp[i][j], dp[i - 1][j] + g[i][j])
+        if j > 0:
+            dp[i][j] = min(dp[i][j], dp[i][j - 1] + g[i][j])
+print(dp[r - 1][c - 1])
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Ways to pay">
+Read `N` and `X`, then `N` coin values. Print the number of ways to pay exactly
+`X` using unlimited coins, where order doesn't matter (`1 + 2` and `2 + 1` are
+the same way).
+
+<Answer>
+
+Loop over coins **outside** so each combination is counted once, in a fixed
+coin order.
+
+```python
+n, x = map(int, input().split())
+coins = list(map(int, input().split()))
+ways = [1] + [0] * x
+for c in coins:
+    for s in range(c, x + 1):
+        ways[s] += ways[s - c]
+print(ways[x])
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Longest common subsequence">
+Read two words. Print the length of the longest sequence of letters that
+appears in both, in the same order (not necessarily next to each other).
+`ABCBDAB` and `BDCABA` → 4.
+
+<Answer>
+
+`dp[i][j]` = LCS length of the first `i` letters of `a` and the first `j` of `b`.
+
+```python
+a, b = input().strip(), input().strip()
+dp = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+for i in range(1, len(a) + 1):
+    for j in range(1, len(b) + 1):
+        if a[i - 1] == b[j - 1]:
+            dp[i][j] = dp[i - 1][j - 1] + 1
+        else:
+            dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+print(dp[len(a)][len(b)])
+```
+
+<Complexity time="O(N · M)" space="O(N · M)" />
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+You've reached the end of the roadmap. Keep training on the
+[practice problems](/problems) — filter by a topic you want to strengthen.
