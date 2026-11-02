@@ -24,12 +24,12 @@ export function OutputPanel({
       </p>
       <div>
         <p className="mb-1 text-xs font-semibold text-muted-foreground">Output (stdout)</p>
-        <pre aria-label="Program output" className="max-h-80 min-h-16 overflow-auto rounded-lg border bg-muted/40 p-3 font-mono text-sm">{stdout}</pre>
+        <pre role="region" aria-label="Program output" className="max-h-80 min-h-16 overflow-auto rounded-lg border bg-muted/40 p-3 font-mono text-sm">{stdout}</pre>
       </div>
       {(stderr || (!result && loadError)) && (
         <div>
           <p className="mb-1 text-xs font-semibold text-destructive">Errors (stderr)</p>
-          <pre aria-label="Program errors" className="max-h-80 overflow-auto rounded-lg border border-destructive/40 bg-destructive/5 p-3 font-mono text-sm text-destructive">
+          <pre role="region" aria-label="Program errors" className="max-h-80 overflow-auto rounded-lg border border-destructive/40 bg-destructive/5 p-3 font-mono text-sm text-destructive">
             {stderr || loadError}
           </pre>
         </div>

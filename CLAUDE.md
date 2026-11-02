@@ -27,6 +27,8 @@ npm run content:check  # validate all MDX frontmatter + problem definitions
 npm run check          # typecheck + oxlint + vitest
 npm run build          # content → tsc -b → vite build → search index
 npm run preview        # serve dist/ (needed to test search, worker, rewrites)
+npm run test:e2e       # Playwright vs preview: routes, 360 px, axe, runner + every editorial (after build;
+                       #   once: npx playwright install chromium). test:e2e:fast skips @slow (Pyodide).
 ```
 
 ## Where things go

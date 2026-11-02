@@ -234,5 +234,6 @@ snippets above it and the full program last.
 - [ ] `npm run content:check` passes
 - [ ] Page looks right in `npm run dev` (light and dark theme, narrow window)
 - [ ] Problem: editorial passes all samples with "Run samples"
+      (or automatically: `npm run build && npm run test:e2e -- --grep @slow`)
 - [ ] New lesson ID added to `src/data/roadmap.ts` (if it belongs on the roadmap)
 - [ ] `npm run check && npm run build` pass

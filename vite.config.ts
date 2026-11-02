@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url'
 import mdx from '@mdx-js/rollup'
 import rehypeShiki from '@shikijs/rehype'
@@ -19,7 +20,7 @@ export default defineConfig({
         remarkPlugins: [remarkGfm, remarkFrontmatter, remarkMdxFrontmatter],
         // Shiki highlights code blocks at BUILD time: zero runtime JS on lesson pages.
         rehypePlugins: [
-          [rehypeShiki, { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false }],
+          [rehypeShiki, { themes: { light: 'github-light-default', dark: 'github-dark-default' }, defaultColor: false }],
         ],
       }),
     },
@@ -30,4 +31,6 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   worker: { format: 'es' },
+  // Playwright specs in e2e/ run with `npm run test:e2e`, not Vitest.
+  test: { exclude: ['**/node_modules/**', 'e2e/**'] },
 })

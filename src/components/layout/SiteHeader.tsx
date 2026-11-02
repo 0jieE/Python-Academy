@@ -26,7 +26,7 @@ const linkClass =
 function Logo() {
   return (
     <>
-      Py<span className="text-emerald-600 dark:text-emerald-400">Academy</span>
+      Py<span className="text-emerald-700 dark:text-emerald-400">Academy</span>
     </>
   )
 }
@@ -58,10 +58,10 @@ export function SiteHeader() {
         <Link to="/" className="mr-auto font-semibold tracking-tight">
           <Logo />
         </Link>
-        <Button variant="outline" onClick={openSearch} className="h-10 gap-2 px-3 text-muted-foreground lg:w-48 lg:justify-start" aria-label="Search (Ctrl+K)">
+        <Button variant="outline" onClick={openSearch} className="h-10 gap-2 px-3 text-muted-foreground lg:w-48 lg:justify-start" aria-keyshortcuts="Control+K Meta+K">
           <Search aria-hidden className="size-4" />
-          <span className="hidden lg:inline">Search…</span>
-          <kbd className="ml-auto hidden rounded border bg-muted px-1.5 font-mono text-[0.7rem] lg:inline">Ctrl K</kbd>
+          <span className="sr-only lg:not-sr-only">Search…</span>
+          <kbd aria-hidden className="ml-auto hidden rounded border bg-muted px-1.5 font-mono text-[0.7rem] text-foreground lg:inline">Ctrl K</kbd>
         </Button>
         <nav aria-label="Main" className="hidden gap-1 md:flex">
           {nav.map((n) => (
