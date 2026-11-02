@@ -1,0 +1,31 @@
+---
+id: algo-prefix-sums
+slug: prefix-sums
+title: Prefix Sums
+summary: Answer many range-sum questions in O(1) each after one O(N) pass.
+category: algorithms
+level: intermediate
+order: 40
+prerequisites: [fund-input-output]
+learningObjectives:
+  - Build a prefix-sum array
+  - Answer sum(l..r) queries in O(1)
+tags: [prefix-sum, arrays, queries, complexity]
+draft: false
+---
+
+<Callout type="todo">
+Placeholder lesson so the algorithms section renders. Replace with the full
+lesson using the template sections from "Input and Output".
+</Callout>
+
+## Idea
+
+```python
+prefix = [0] * (n + 1)
+for i in range(n):
+    prefix[i + 1] = prefix[i] + a[i]
+
+# sum of a[l..r] (0-based, inclusive)
+total = prefix[r + 1] - prefix[l]
+```

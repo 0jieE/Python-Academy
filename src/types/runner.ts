@@ -1,0 +1,67 @@
+/**
+ * Message protocol between the UI thread and `src/workers/python.worker.ts`,
+ * plus the `CodeRunner` abstraction the UI talks to.
+ *
+ * The UI never imports Pyodide directly. A future backend judge can implement
+ * `CodeRunner` (RemoteRunner) without touching the playground UI.
+ */
+
+export type RunnerStatus =
+  | 'idle' // worker not created yet
+  | 'loading' // downloading / initializing Pyodide
+  | 'ready'
+  | 'running'
+  | 'finished'
+  | 'error' // Python raised, or runtime failed to load
+  | 'stopped' // user pressed Stop
+  | 'timeout' // time limit hit; worker was terminated
+
+export interface RunRequest {
+  code: string
+  /** Entire stdin, supplied up front (competition style). input() reads line by line. */
+  stdin: string
+  timeLimitMs: number
+  /** Cap on captured stdout+stderr characters, to protect the UI. */
+  maxOutputChars: number
+}
+
+export interface RunResult {
+  status: Extract<RunnerStatus, 'finished' | 'error' | 'stopped' | 'timeout'>
+  stdout: string
+  stderr: string
+  /** Wall-clock ms inside the worker (excludes Pyodide load). */
+  durationMs: number
+  /** True when output was cut at `maxOutputChars`. */
+  truncated: boolean
+}
+
+// ---- Worker messages -------------------------------------------------------
+
+export type ToWorker =
+  | { type: 'init'; indexURL: string }
+  | { type: 'run'; runId: string; request: RunRequest }
+
+export type FromWorker =
+  | { type: 'ready'; pythonVersion: string }
+  | { type: 'init-error'; message: string }
+  | { type: 'stdout'; runId: string; chunk: string }
+  | { type: 'stderr'; runId: string; chunk: string }
+  | { type: 'done'; runId: string; result: RunResult }
+
+// ---- UI-facing abstraction -------------------------------------------------
+
+export interface RunCallbacks {
+  onStatus?: (status: RunnerStatus) => void
+  onStdout?: (chunk: string) => void
+  onStderr?: (chunk: string) => void
+}
+
+export interface CodeRunner {
+  readonly status: RunnerStatus
+  /** Start loading the runtime early (e.g. when the editor gets focus). */
+  warmUp(): Promise<void>
+  run(request: RunRequest, callbacks?: RunCallbacks): Promise<RunResult>
+  /** Terminate the current run. MVP strategy: terminate the worker and respawn. */
+  stop(): void
+  dispose(): void
+}

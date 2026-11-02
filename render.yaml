@@ -1,0 +1,25 @@
+# Render Blueprint — optional. You can also create the Static Site in the
+# dashboard with the same values (see docs/PLAN.md §7).
+services:
+  - type: web
+    name: py-academy
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    headers:
+      # Hashed build assets never change → cache for a year.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /pagefind/*
+        name: Cache-Control
+        value: public, max-age=3600
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    routes:
+      # SPA fallback. Render only applies this when NO file exists at the path,
+      # so /assets/*, /pagefind/* and worker chunks are still served directly.
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,0 +1,33 @@
+---
+id: cs-fast-io
+slug: fast-io
+title: Fast Input / Output
+summary: Copy-ready patterns for reading and printing quickly in contests.
+category: cheat-sheets
+level: beginner
+order: 10
+prerequisites: []
+learningObjectives: []
+tags: [io, stdin, performance]
+---
+
+| Task | Code | Notes |
+| --- | --- | --- |
+| One int | `n = int(input())` | |
+| Ints on a line | `a = list(map(int, input().split()))` | |
+| Everything at once | `data = sys.stdin.buffer.read().split()` | fastest; items are bytes, `int()` still works |
+| Fast line reader | `input = sys.stdin.readline` | keeps the `\n` — use `.strip()` for strings |
+| Print a list | `print(*a)` | space-separated |
+| Many lines out | `sys.stdout.write("\n".join(map(str, out)) + "\n")` | avoid printing in a loop |
+
+```python
+import sys
+
+def main() -> None:
+    data = sys.stdin.buffer.read().split()
+    n = int(data[0])
+    a = list(map(int, data[1:1 + n]))
+    print(sum(a))
+
+main()
+```

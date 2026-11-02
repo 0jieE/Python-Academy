@@ -1,0 +1,93 @@
+---
+id: fund-input-output
+slug: input-output
+title: Input and Output
+summary: Read competition input with input() and sys.stdin, and print answers in exactly the format the judge expects.
+category: fundamentals
+level: beginner
+order: 10
+prerequisites: []
+learningObjectives:
+  - Read one value, several values on a line, and many lines of input
+  - Convert text input to int and float safely
+  - Print output in the exact format a judge compares
+tags: [input, print, stdin, io]
+practiceProblems: [sum-of-two]
+---
+
+<Callout type="note">
+This is the **template lesson**. Every lesson follows the same sections:
+objectives → explanation → examples → common mistakes → competition use → exercises → next topic.
+</Callout>
+
+## Why this matters
+
+In a contest, your program never talks to a person. A judge feeds it text on
+**standard input (stdin)** and compares what you print on **standard output
+(stdout)** character by character. Most beginner "wrong answers" are really
+input/output mistakes.
+
+## Reading input
+
+`input()` reads **one line** as a string, without the newline.
+
+```python
+name = input()          # "Ana"
+n = int(input())        # "5"  -> 5
+```
+
+Several numbers on one line:
+
+```python
+a, b = map(int, input().split())        # "3 4" -> 3, 4
+nums = list(map(int, input().split()))  # "1 2 3" -> [1, 2, 3]
+```
+
+Many lines, when the first line says how many follow:
+
+```python
+n = int(input())
+for _ in range(n):
+    x = int(input())
+```
+
+For large inputs, `sys.stdin` is much faster:
+
+```python
+import sys
+data = sys.stdin.read().split()
+n = int(data[0])
+nums = list(map(int, data[1:1 + n]))
+```
+
+## Printing output
+
+```python
+print(a + b)                 # 7
+print(a, b)                  # "3 4"   (space-separated)
+print(*nums)                 # "1 2 3" (unpack a list)
+print(f"{3.14159:.2f}")      # "3.14"  (fixed decimals)
+print("\n".join(map(str, nums)))  # one per line, fast
+```
+
+## Common mistakes
+
+- Printing extra text like `print("Answer:", x)` — the judge only wants `x`.
+- Forgetting `int(...)`, so `"3" + "4"` becomes `"34"`.
+- Calling `input()` once when the numbers are on **separate lines**.
+- Wrong number of decimals: read the output spec carefully.
+
+## Competition use
+
+Start every solution by writing the input-reading code **first**, then print
+the parsed values to check them against the sample input before solving.
+
+## Exercises
+
+1. Read two integers on one line and print their sum.
+2. Read `N`, then `N` integers on the next line, and print the largest.
+3. Read a name and print `Hello, <name>!`.
+
+## Next topic
+
+Operators and expressions — integer division, modulo and powers.
