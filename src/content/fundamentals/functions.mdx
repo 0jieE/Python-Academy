@@ -1,0 +1,221 @@
+---
+id: fund-functions
+slug: functions
+title: Functions
+summary: Split a solution into small functions, return values instead of printing, and avoid the classic scope and default-argument traps.
+category: fundamentals
+level: beginner
+order: 70
+prerequisites: [fund-lists]
+learningObjectives:
+  - Define functions with parameters and return values
+  - Understand local and global variables
+  - Avoid mutable default arguments
+  - Use a main() function and a solve() per test case
+tags: [functions, def, return, scope, lambda, recursion]
+practiceProblems: [letter-grade]
+draft: false
+---
+
+## Why this matters
+
+Contest solutions grow quickly: read input, check something, compute, print.
+Putting each step in a function makes the code easier to test and to fix
+under time pressure. It also helps with multiple test cases: write
+`solve()` once and call it `T` times.
+
+<KeyIdea>
+A function should **return** its answer. Let the caller decide what to print.
+</KeyIdea>
+
+## Defining and calling
+
+```python
+def area(width, height):
+    return width * height
+
+print(area(3, 4))   # 12
+```
+
+A function without `return` gives back `None`. A `return` ends the function
+immediately — handy for early exits:
+
+```python
+def is_prime(n):
+    if n < 2:
+        return False
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            return False
+        d += 1
+    return True
+```
+
+## Parameters
+
+```python
+def greet(name, greeting="Hello"):     # default value
+    return f"{greeting}, {name}!"
+
+print(greet("Ana"))                    # Hello, Ana!
+print(greet("Ben", greeting="Hi"))     # Hi, Ben!
+```
+
+Return several values as a tuple and unpack them:
+
+```python
+def min_max(a):
+    return min(a), max(a)
+
+lo, hi = min_max([4, 1, 9])
+```
+
+## Scope
+
+Variables created inside a function are **local** — they disappear when it
+returns and don't change variables outside. Reading a global variable works,
+but assigning to it inside a function creates a new local variable instead.
+Pass values in and return results out rather than using `global`.
+
+<Callout type="warning">
+Never use a list or dict as a default value: `def add(x, items=[])` shares
+**one** list across every call. Use `items=None` and create the list inside.
+</Callout>
+
+## Small functions: lambda
+
+`lambda` makes a tiny one-expression function, mostly used as a sort key:
+
+```python
+pairs = [("ana", 90), ("ben", 75), ("cy", 90)]
+pairs.sort(key=lambda p: (-p[1], p[0]))   # by score desc, then name
+```
+
+## A contest template
+
+<RunnableExample title="solve() per test case" stdin={"3\n5\n-2\n0\n"}>
+
+```python
+def solve(n):
+    if n > 0:
+        return "positive"
+    if n < 0:
+        return "negative"
+    return "zero"
+
+def main():
+    t = int(input())
+    out = []
+    for _ in range(t):
+        out.append(solve(int(input())))
+    print("\n".join(out))
+
+main()
+```
+
+</RunnableExample>
+
+Code inside a function also runs a little faster in CPython than code at the
+top level, because local variables are quicker to look up.
+
+## Recursion
+
+A function can call itself. Python stops very deep recursion (about 1000
+levels by default), so for deep cases use a loop instead, or raise the limit
+with `sys.setrecursionlimit` carefully.
+
+```python
+def fact(n):
+    return 1 if n <= 1 else n * fact(n - 1)
+```
+
+## Common mistakes
+
+- Printing inside the function **and** printing its result: you get `None` in the output.
+- Forgetting `return` — the result is `None`.
+- Calling a function before it is defined at the top level.
+- Mutable default arguments (`def f(a=[])`).
+- Very deep recursion → `RecursionError`.
+
+## Competition use
+
+- Write `solve()` for one test case; test it on the sample, then loop.
+- Keep helpers like `is_prime`, `gcd`, `digit_sum` small and well-named.
+- Put everything in `main()` and call it at the bottom.
+
+## Exercises
+
+<Exercise title="Grade function">
+Write `grade(score)` that returns `"A"`–`"F"` (A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60).
+Read `N` scores on one line and print their letters separated by spaces.
+
+<Answer>
+
+```python
+def grade(score):
+    if score >= 90:
+        return "A"
+    if score >= 80:
+        return "B"
+    if score >= 70:
+        return "C"
+    if score >= 60:
+        return "D"
+    return "F"
+
+scores = list(map(int, input().split()))
+print(*[grade(s) for s in scores])
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Count primes">
+Using `is_prime` from above, read `N` and print how many primes are ≤ `N`
+(`N ≤ 10^4`).
+
+<Answer>
+
+```python
+def is_prime(n):
+    if n < 2:
+        return False
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            return False
+        d += 1
+    return True
+
+n = int(input())
+print(sum(1 for x in range(2, n + 1) if is_prime(x)))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="GCD">
+Write a function `gcd(a, b)` using Euclid's rule `gcd(a, b) = gcd(b, a % b)`,
+`gcd(a, 0) = a`. Read two numbers and print their GCD.
+
+<Answer>
+
+```python
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+a, b = map(int, input().split())
+print(gcd(a, b))
+```
+
+(Python also has `math.gcd`.)
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Dicts and sets — counting and fast lookups.

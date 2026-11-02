@@ -1,0 +1,198 @@
+---
+id: fund-lists
+slug: lists
+title: Lists
+summary: Store many values, sort them, transform them with comprehensions, and know which list operations are slow.
+category: fundamentals
+level: beginner
+order: 60
+prerequisites: [fund-strings]
+learningObjectives:
+  - Create, index, slice and modify lists
+  - Use sum, min, max, sorted and list comprehensions
+  - Build a 2D grid correctly
+  - Know which list operations are O(1) and which are O(N)
+tags: [lists, arrays, sort, sorted, comprehension, append, 2d, grid]
+practiceProblems: [second-largest]
+draft: false
+---
+
+## Why this matters
+
+Lists are Python's arrays. Most contest inputs are "`N` numbers" and most
+solutions keep them in a list, sort it, or scan it. Using the right list
+operations is the difference between a fast solution and a timeout.
+
+<KeyIdea>
+Appending, reading `a[i]` and popping from the **end** are fast. Searching
+with `in`, `index`, `remove`, or inserting at the front are slow — they scan
+the whole list.
+</KeyIdea>
+
+## Creating and changing lists
+
+```python
+nums = [5, 3, 8]
+nums.append(1)        # [5, 3, 8, 1]
+nums[0] = 7           # [7, 3, 8, 1]
+last = nums.pop()     # removes and returns 1
+print(len(nums), nums[-1], nums[1:])   # 3 8 [3, 8]
+
+zeros = [0] * 5       # [0, 0, 0, 0, 0]
+```
+
+Reading a list from input is the most common line in competitive Python:
+
+```python
+nums = list(map(int, input().split()))
+```
+
+## Built-in helpers
+
+<RunnableExample title="Quick statistics" stdin={"6\n4 9 1 7 3 9\n"}>
+
+```python
+n = int(input())
+a = list(map(int, input().split()))
+print(sum(a), min(a), max(a))
+print(sorted(a))                 # new sorted list
+print(sorted(a, reverse=True))   # largest first
+print(a.count(9), a.index(7))    # 2 3
+```
+
+</RunnableExample>
+
+`sorted(a)` returns a new list; `a.sort()` sorts in place and returns `None`
+(so never write `a = a.sort()`). Both cost <Complexity time="O(N log N)" />.
+
+## List comprehensions
+
+A comprehension builds a new list from an old one in one line:
+
+```python
+squares = [x * x for x in range(1, 6)]        # [1, 4, 9, 16, 25]
+evens = [x for x in nums if x % 2 == 0]
+words = [w.lower() for w in input().split()]
+```
+
+## 2D lists (grids)
+
+Grids appear in many problems. Build each row separately:
+
+```python
+rows, cols = 3, 4
+grid = [[0] * cols for _ in range(rows)]   # correct
+grid[0][1] = 5
+```
+
+<Callout type="warning">
+`[[0] * cols] * rows` looks the same but makes every row the **same list** —
+changing `grid[0][1]` changes every row.
+</Callout>
+
+Reading a grid of characters:
+
+```python
+r, c = map(int, input().split())
+grid = [input().strip() for _ in range(r)]
+print(grid[1][2])     # row 1, column 2
+```
+
+## Copies and references
+
+`b = a` does **not** copy — both names point to the same list. Use
+`b = a[:]` or `b = list(a)` for a copy.
+
+## Cost of list operations
+
+| Operation | Cost |
+| --- | --- |
+| `a[i]`, `a[i] = x`, `len(a)`, `a.append(x)`, `a.pop()` | <Complexity time="O(1)" /> |
+| `x in a`, `a.index(x)`, `a.count(x)`, `a.remove(x)`, `min`, `max`, `sum` | <Complexity time="O(N)" /> |
+| `a.insert(0, x)`, `a.pop(0)` | <Complexity time="O(N)" /> |
+| `sorted(a)`, `a.sort()` | <Complexity time="O(N log N)" /> |
+
+Calling an `O(N)` operation inside a loop over `N` items gives `O(N^2)`.
+Use a set for repeated membership checks and `collections.deque` for a queue.
+
+## Common mistakes
+
+- `a = a.sort()` — sets `a` to `None`.
+- Index out of range: the last index is `len(a) - 1`.
+- `[[0] * m] * n` for a grid — rows are shared.
+- `if x in a` inside a big loop — slow; convert `a` to a set first.
+
+## Competition use
+
+- Read once: `a = list(map(int, input().split()))`.
+- Sort when order helps: closest pair, k-th smallest, greedy choices.
+- Print a list on one line with `print(*a)`.
+
+## Exercises
+
+<Exercise title="Reverse the list">
+Read `N` and `N` integers; print them in reverse order on one line.
+
+<Answer>
+
+```python
+n = int(input())
+a = list(map(int, input().split()))
+print(*a[::-1])
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Above average">
+Read `N` and `N` integers. Print how many numbers are strictly greater than
+the average.
+
+<Answer>
+
+```python
+n = int(input())
+a = list(map(int, input().split()))
+total = sum(a)
+# x > total / n  is the same as  x * n > total  (no floats needed)
+print(sum(1 for x in a if x * n > total))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Smallest gap">
+Read `N ≥ 2` integers and print the smallest difference between any two of them.
+
+<Answer>
+
+```python
+n = int(input())
+a = sorted(map(int, input().split()))
+print(min(a[i + 1] - a[i] for i in range(n - 1)))
+```
+
+After sorting, the closest pair is always next to each other, so one pass
+over neighbours is enough: <Complexity time="O(N log N)" />.
+
+</Answer>
+</Exercise>
+
+<Exercise title="Row sums">
+Read `R` and `C`, then a grid of `R` lines with `C` integers each. Print the
+sum of every row on one line.
+
+<Answer>
+
+```python
+r, c = map(int, input().split())
+grid = [list(map(int, input().split())) for _ in range(r)]
+print(*[sum(row) for row in grid])
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Functions — organise your solution into small, testable pieces.

@@ -1,0 +1,185 @@
+---
+id: fund-operators
+slug: operators
+title: Operators and Expressions
+summary: Do arithmetic the way contest problems need it — integer division, remainders, powers and big numbers.
+category: fundamentals
+level: beginner
+order: 20
+prerequisites: [fund-input-output]
+learningObjectives:
+  - Choose between / and // and know which gives a float
+  - Use % and divmod to split numbers into parts
+  - Work with very large integers and powers modulo M
+tags: [operators, arithmetic, division, modulo, power, divmod, int, float]
+practiceProblems: [clock-time, sum-of-two]
+draft: false
+---
+
+## Why this matters
+
+Almost every contest problem does some arithmetic: converting units, counting
+groups, checking divisibility, or printing an answer "modulo 10^9 + 7". Python
+makes this easy, but a few operators behave differently from other languages
+and from what you might expect.
+
+<KeyIdea>
+Use `//` and `%` for whole-number answers. `/` **always** gives a float, and
+floats can be slightly wrong for big numbers.
+</KeyIdea>
+
+## The arithmetic operators
+
+```python
+a, b = 17, 5
+print(a + b)    # 22
+print(a - b)    # 12
+print(a * b)    # 85
+print(a / b)    # 3.4   true division: always a float
+print(a // b)   # 3     floor division: rounds down
+print(a % b)    # 2     remainder
+print(a ** b)   # 1419857  power
+```
+
+`divmod(a, b)` returns `(a // b, a % b)` in one step:
+
+<RunnableExample title="Seconds to minutes and seconds" stdin="125">
+
+```python
+total = int(input())
+minutes, seconds = divmod(total, 60)
+print(minutes, seconds)   # 2 5
+```
+
+</RunnableExample>
+
+## Division and negative numbers
+
+Python's `//` rounds **down** (towards minus infinity), not towards zero.
+The remainder then has the same sign as the divisor.
+
+```python
+print(7 // 2)     # 3
+print(-7 // 2)    # -4  (not -3)
+print(-7 % 2)     # 1   (so -7 is odd: -7 % 2 != 0)
+print(int(-7 / 2))  # -3  truncates towards zero
+```
+
+This is usually what you want — for example `x % 2 == 0` tests "even"
+correctly for negative `x` too.
+
+Ceiling division (how many boxes of size `k` do I need for `n` items?)
+without floats:
+
+```python
+boxes = (n + k - 1) // k      # or: -(-n // k)
+```
+
+## Big integers and floats
+
+Python integers have **no size limit**, so `2 ** 100` or the product of many
+large numbers is exact. Floats are not: they keep about 15–16 significant
+digits.
+
+```python
+print(2 ** 64)                  # 18446744073709551616 (exact)
+print(int(10 ** 18 / 3))        # 333333333333333312  — wrong digits!
+print(10 ** 18 // 3)            # 333333333333333333  — correct
+```
+
+When a problem says "print the answer modulo `M`", reduce as you go, and use
+the three-argument `pow` for powers — it is fast even for huge exponents:
+
+```python
+MOD = 10 ** 9 + 7
+print(pow(2, 10 ** 18, MOD))    # fast: O(log exponent)
+```
+
+## Comparison and assignment shortcuts
+
+```python
+x = 5
+x += 3        # x = x + 3  -> 8
+x *= 2        # 16
+x //= 3       # 5
+print(1 <= x <= 10)   # chained comparison: True
+print(abs(-4), max(3, 9), min(3, 9))   # 4 9 3
+```
+
+Precedence follows math: `**` first, then `* / // %`, then `+ -`.
+Note that `-2 ** 2` is `-4` because `**` binds tighter than the minus sign.
+When in doubt, add parentheses.
+
+## Common mistakes
+
+- Using `/` and then printing `3.0` when the judge expects `3`.
+- Converting with `int(a / b)` for big numbers — use `a // b`.
+- Assuming `-7 // 2` is `-3` (it is `-4`).
+- Writing `n ** 0.5` and comparing it with an integer: use `math.isqrt(n)` for exact integer square roots.
+- Using `round(2.5)` and expecting `3` — Python rounds halves to the nearest **even** number (`2`). Use `f"{x:.2f}"` for printing decimals.
+
+## Competition use
+
+- Read the output spec: integer answer → stay in integers with `//`, `%`, `divmod`.
+- "Modulo 10^9 + 7" → store `MOD` once and apply `% MOD` after every multiplication.
+- Need decimals? Compute with floats only at the end and format with `f"{x:.6f}"`.
+
+## Exercises
+
+<Exercise title="Pizza slices">
+`N` students share pizzas cut into 8 slices each. Every student gets exactly
+one slice. Read `N` and print how many pizzas to order.
+
+<Answer>
+
+```python
+n = int(input())
+print((n + 7) // 8)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Last digit">
+Read a (possibly huge) non-negative integer `N` and print its last digit.
+
+<Answer>
+
+```python
+n = int(input())
+print(n % 10)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Average with two decimals">
+Read three integers on one line and print their average with exactly two
+digits after the decimal point.
+
+<Answer>
+
+```python
+a, b, c = map(int, input().split())
+print(f"{(a + b + c) / 3:.2f}")
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Power modulo">
+Read `A` and `B` and print `A^B` modulo `10^9 + 7`. `B` can be up to `10^18`.
+
+<Answer>
+
+```python
+a, b = map(int, input().split())
+print(pow(a, b, 10 ** 9 + 7))
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Conditionals — making decisions with `if`, `elif` and `else`.

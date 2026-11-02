@@ -1,0 +1,21 @@
+## Idea
+
+A common mistake is `sorted(nums)[-2]`: for `4 1 7 7 3` it prints `7`,
+because the maximum appears twice. We need a value **strictly smaller** than
+the maximum.
+
+1. Find the maximum `best`.
+2. Keep only the numbers different from `best`.
+3. If nothing is left, print `NONE`; otherwise print the largest of the rest.
+
+Both steps are a single pass over the list.
+
+```python
+n = int(input())
+nums = list(map(int, input().split()))
+best = max(nums)
+rest = [x for x in nums if x != best]
+print(max(rest) if rest else "NONE")
+```
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" />

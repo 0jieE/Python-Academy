@@ -1,0 +1,191 @@
+---
+id: fund-strings
+slug: strings
+title: Strings
+summary: Index, slice, search and build text — and do it fast enough for long inputs.
+category: fundamentals
+level: beginner
+order: 50
+prerequisites: [fund-loops]
+learningObjectives:
+  - Index and slice strings, including negative indexes and reversing
+  - Use the most common string methods (strip, split, lower, count, find, replace)
+  - Convert between characters and numbers with ord() and chr()
+  - Build long strings efficiently with join
+tags: [strings, slicing, join, split, ord, chr, text]
+practiceProblems: [palindrome-word]
+draft: false
+---
+
+## Why this matters
+
+Text problems are everywhere in beginner contests: palindromes, counting
+vowels, ciphers, formatting names. Python strings have powerful built-in
+tools, so most of these are a few lines — once you know the tools.
+
+<KeyIdea>
+Strings can't be changed in place. To "edit" one, build a **new** string —
+and when you build from many pieces, collect them in a list and `"".join` it.
+</KeyIdea>
+
+## Indexing and slicing
+
+```python
+s = "contest"
+print(len(s))     # 7
+print(s[0])       # c   first character
+print(s[-1])      # t   last character
+print(s[1:4])     # ont characters 1, 2, 3
+print(s[:3])      # con first three
+print(s[3:])      # test from index 3 to the end
+print(s[::-1])    # tsetnoc reversed
+```
+
+A slice `s[a:b]` includes `a` and stops **before** `b`. Slices never raise an
+error for out-of-range ends: `s[5:100]` is just `"st"`.
+
+## Useful methods
+
+Methods return a **new** string; the original is unchanged.
+
+```python
+line = "  Hello World  "
+print(line.strip())           # "Hello World"  remove spaces/newlines at both ends
+print(line.lower())           # "  hello world  "
+print("a,b,c".split(","))     # ['a', 'b', 'c']
+print("banana".count("a"))    # 3
+print("banana".find("na"))    # 2   (-1 if not found)
+print("banana".replace("a", "o"))   # bonono
+print("abc".startswith("ab"))       # True
+print("42".isdigit(), "ab".isalpha())  # True True
+```
+
+## Looping over characters
+
+<RunnableExample title="Count vowels" stdin="Programming Contest">
+
+```python
+s = input().lower()
+vowels = 0
+for ch in s:
+    if ch in "aeiou":
+        vowels += 1
+print(vowels)
+```
+
+</RunnableExample>
+
+## Characters and numbers
+
+Every character has a number (its Unicode code). `ord` and `chr` convert
+between them. Letters `a`–`z` are consecutive, which makes shifts easy:
+
+```python
+print(ord("a"), ord("b"), chr(99))   # 97 98 c
+pos = ord("d") - ord("a")            # 3: position in the alphabet
+shifted = chr((pos + 3) % 26 + ord("a"))   # "g" — a Caesar shift by 3
+```
+
+## Building strings
+
+Adding strings in a loop with `+=` copies the text every time, which can be
+slow for long inputs. Collect the pieces in a list and join once:
+
+<RunnableExample title="Caesar cipher" stdin="hello">
+
+```python
+s = input()
+out = []
+for ch in s:
+    out.append(chr((ord(ch) - ord("a") + 3) % 26 + ord("a")))
+print("".join(out))
+```
+
+</RunnableExample>
+
+`" ".join(words)` puts a space between words; `"\n".join(lines)` puts each on
+its own line. All items must be strings — use `map(str, nums)` for numbers.
+
+## Common mistakes
+
+- Trying `s[0] = "x"` — strings are immutable. Use `s = "x" + s[1:]` or a list of characters.
+- Forgetting `.strip()` when a line may end with spaces or `\r` (files saved on Windows).
+- Comparing `"10" < "9"` — strings compare letter by letter, so this is `True`. Convert to `int` first.
+- `split()` vs `split(" ")`: the first handles any number of spaces; the second creates empty strings for double spaces.
+
+## Competition use
+
+- Palindrome: `s == s[::-1]`.
+- Letter counts: loop and count, or use a dictionary / `Counter` (see Dicts and Sets).
+- Output many pieces with `"".join(...)` or `"\n".join(...)`, not repeated `+=`.
+
+## Exercises
+
+<Exercise title="Reverse words">
+Read a line of words and print the words in reverse order (not the letters).
+`I love Python` → `Python love I`.
+
+<Answer>
+
+```python
+words = input().split()
+print(" ".join(words[::-1]))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Capitalize names">
+Read a full name in any case, like `jUAN dela CRUZ`, and print every word with
+the first letter upper case and the rest lower case: `Juan Dela Cruz`.
+
+<Answer>
+
+```python
+words = input().split()
+print(" ".join(w[0].upper() + w[1:].lower() for w in words))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Count a letter">
+Read a word and a letter on two lines and print how many times the letter
+appears, ignoring case.
+
+<Answer>
+
+```python
+word = input().strip().lower()
+letter = input().strip().lower()
+print(word.count(letter))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Run-length encoding">
+Read a string of letters and compress runs of the same letter:
+`aaabccdddd` → `a3b1c2d4`.
+
+<Answer>
+
+```python
+s = input().strip()
+out = []
+i = 0
+while i < len(s):
+    j = i
+    while j < len(s) and s[j] == s[i]:
+        j += 1
+    out.append(s[i] + str(j - i))
+    i = j
+print("".join(out))
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Lists — storing, sorting and transforming many values.

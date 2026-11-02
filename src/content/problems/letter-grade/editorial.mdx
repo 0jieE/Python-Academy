@@ -1,0 +1,25 @@
+## Idea
+
+Test the conditions from the **highest** grade down. `elif` only runs when
+every condition above it was false, so by the time we check `s >= 80` we
+already know `s < 90`.
+
+Boundary values are where most wrong answers come from: with `>` instead of
+`>=`, a score of exactly 90 would become a B. Always try the boundaries
+(90, 89, 60, 59, 0, 100) before submitting.
+
+```python
+s = int(input())
+if s >= 90:
+    print("A")
+elif s >= 80:
+    print("B")
+elif s >= 70:
+    print("C")
+elif s >= 60:
+    print("D")
+else:
+    print("F")
+```
+
+**Complexity:** <Complexity time="O(1)" space="O(1)" />

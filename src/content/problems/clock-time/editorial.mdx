@@ -1,0 +1,15 @@
+## Idea
+
+One hour has 60 minutes, so the hours are `M // 60` and the minutes left over
+are `M % 60`. `divmod` gives both at once.
+
+The only trap is the format: `2:5` is wrong, the judge expects `2:05`. The
+format spec `:02d` pads an integer with zeros to width 2.
+
+```python
+m = int(input())
+h, mm = divmod(m, 60)
+print(f"{h}:{mm:02d}")
+```
+
+**Complexity:** <Complexity time="O(1)" space="O(1)" />

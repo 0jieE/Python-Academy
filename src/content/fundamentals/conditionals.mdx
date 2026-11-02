@@ -1,0 +1,172 @@
+---
+id: fund-conditionals
+slug: conditionals
+title: Conditionals
+summary: Make decisions with if, elif and else, combine conditions, and test the boundary cases judges love.
+category: fundamentals
+level: beginner
+order: 30
+prerequisites: [fund-operators]
+learningObjectives:
+  - Write if / elif / else chains in the right order
+  - Combine conditions with and, or, not and chained comparisons
+  - Find and test boundary values before submitting
+tags: [if, elif, else, conditions, boolean, and, or, not]
+practiceProblems: [letter-grade]
+draft: false
+---
+
+## Why this matters
+
+Many easy contest problems are "print YES or NO" or "classify this value".
+They are quick points — **if** you get the conditions and the edge cases
+right. Judges always include test cases exactly on the boundaries.
+
+<KeyIdea>
+Order the checks so each `elif` only handles what is left, and always test
+the values **on** each boundary (like 89, 90 and 100).
+</KeyIdea>
+
+## if, elif, else
+
+Python runs the **first** branch whose condition is true, then skips the rest.
+
+<RunnableExample title="Sign of a number" stdin="-3">
+
+```python
+x = int(input())
+if x > 0:
+    print("positive")
+elif x < 0:
+    print("negative")
+else:
+    print("zero")
+```
+
+</RunnableExample>
+
+The indentation (4 spaces) decides what belongs to each branch.
+
+## Comparisons and logic
+
+| Operator | Meaning |
+| --- | --- |
+| `==`, `!=` | equal, not equal |
+| `<`, `<=`, `>`, `>=` | ordering |
+| `and`, `or`, `not` | combine conditions |
+| `in` | membership: `"a" in "cat"`, `3 in nums` |
+
+Python lets you **chain** comparisons, which reads like math:
+
+```python
+if 1 <= day <= 31:
+    print("valid day")
+
+# leap year rule
+leap = (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+```
+
+`and` and `or` stop early ("short-circuit"): in `i < n and a[i] > 0`, the
+index is only used when it is valid.
+
+## One-line choice
+
+A conditional expression picks one of two values:
+
+```python
+print("YES" if a == b else "NO")
+```
+
+Use it for short YES/NO answers. For anything longer, a normal `if` is easier
+to read.
+
+## Truthy and falsy
+
+Empty things and zero count as false: `0`, `0.0`, `""`, `[]`, `{}`, `None`.
+
+```python
+nums = []
+if not nums:
+    print("empty")
+```
+
+## Common mistakes
+
+- Using `=` (assignment) instead of `==` (comparison) — Python gives a SyntaxError.
+- Wrong order: checking `s >= 60` before `s >= 90` makes everyone a D.
+- `>` vs `>=` on a boundary — re-read the statement: "at least" means `>=`.
+- `if x == 1 or 2:` is always true. Write `if x == 1 or x == 2:` or `if x in (1, 2):`.
+- Printing `Yes` when the judge wants `YES` — output is compared exactly.
+
+## Competition use
+
+Before submitting a classification problem, list the boundaries from the
+statement and run each one in the playground. It takes a minute and saves a
+wrong-answer penalty.
+
+## Exercises
+
+<Exercise title="Even or odd">
+Read an integer and print `EVEN` or `ODD`. It can be negative.
+
+<Answer>
+
+```python
+n = int(input())
+print("EVEN" if n % 2 == 0 else "ODD")
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Leap year">
+Read a year and print `YES` if it is a leap year, otherwise `NO`. A year is a
+leap year if it is divisible by 4, except years divisible by 100, unless they
+are also divisible by 400.
+
+<Answer>
+
+```python
+y = int(input())
+leap = (y % 4 == 0 and y % 100 != 0) or y % 400 == 0
+print("YES" if leap else "NO")
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Triangle check">
+Read three side lengths. Print `YES` if they can form a triangle (each side is
+smaller than the sum of the other two), otherwise `NO`.
+
+<Answer>
+
+```python
+a, b, c = map(int, input().split())
+print("YES" if a < b + c and b < a + c and c < a + b else "NO")
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Max of three without max()">
+Read three integers and print the largest using only `if` statements.
+
+<Answer>
+
+```python
+a, b, c = map(int, input().split())
+best = a
+if b > best:
+    best = b
+if c > best:
+    best = c
+print(best)
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Loops — repeating work with `for` and `while`.

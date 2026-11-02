@@ -1,0 +1,24 @@
+## Idea
+
+Walk through the numbers once and keep a running total of the even ones.
+In Python `-2 % 2` is `0`, so the same test works for negative numbers.
+Python integers never overflow, so the sum of `10^5` values up to `10^9` is fine.
+
+The loop version:
+
+```python
+total = 0
+for x in nums:
+    if x % 2 == 0:
+        total += x
+```
+
+The same thing as one line with a generator expression:
+
+```python
+n = int(input())
+nums = list(map(int, input().split()))
+print(sum(x for x in nums if x % 2 == 0))
+```
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" /> (the list of input numbers).

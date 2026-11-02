@@ -1,0 +1,15 @@
+## Idea
+
+Lower-case the word so that `L` and `l` compare equal, then compare it with
+its reverse. The slice `w[::-1]` walks the string with step `-1`, which
+reverses it.
+
+Use `input().strip()` so a stray space or `\r` at the end of the line can't
+break the comparison.
+
+```python
+w = input().strip().lower()
+print("YES" if w == w[::-1] else "NO")
+```
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" /> — reversing makes a copy of the word.
