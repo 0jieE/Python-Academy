@@ -3,7 +3,7 @@
 Counting with `words.count(w)` for every word is `O(N²)`. A dictionary counts
 everything in one pass:
 
-```python
+```python norun
 count = {}
 for w in words:
     count[w] = count.get(w, 0) + 1

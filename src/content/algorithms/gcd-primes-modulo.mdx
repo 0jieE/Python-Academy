@@ -35,7 +35,7 @@ modulo `M`, apply `% M` after every `+` and `*`.
 The **greatest common divisor** `gcd(a, b)` is the largest number dividing both.
 Euclid's rule `gcd(a, b) = gcd(b, a % b)` shrinks the numbers very fast:
 
-```python
+```python norun
 def gcd(a, b):
     while b:
         a, b = b, a % b
@@ -44,7 +44,7 @@ def gcd(a, b):
 
 In practice use the library — it works for any number of arguments:
 
-```python
+```python norun
 import math
 math.gcd(84, 36)          # 12
 math.lcm(4, 6)            # 12

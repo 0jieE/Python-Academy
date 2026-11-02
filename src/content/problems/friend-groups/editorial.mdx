@@ -7,7 +7,7 @@ A friend group is a **connected component**. Go through the students in order;
 whenever one hasn't been seen, it starts a new group. Explore the whole group
 with an **iterative DFS** (a list used as a stack), counting its members:
 
-```python
+```python norun
 stack = [start]
 seen[start] = True
 while stack:

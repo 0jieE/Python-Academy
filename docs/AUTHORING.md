@@ -129,9 +129,14 @@ Sorting costs <Complexity time="O(N log N)" space="O(N)" />.
 **Every ```python block is runnable.** Students press **Run** under the block
 and the output appears right there; if the program calls `input()`, a sheet pops
 up and asks for it. Python loads only when Run is pressed. So write code blocks
-that run on their own where you can (define what they use, print something). A
-fragment that needs earlier code still shows Run — that's fine, but say in the
-text that it's part of a bigger program. ```text blocks get no Run button.
+that run on their own where you can (define what they use, print something).
+
+**Fragments get `norun`.** Write ```` ```python norun ```` for a block that isn't
+a whole program: it uses names from earlier code (`a`, `n`, `adj`…), only
+defines a function, or shows values in comments without printing. It keeps
+Copy and Edit in IDE but has no Run button. Quick test: if running the block
+alone gives a `NameError` or prints nothing, it is a fragment. ```text blocks
+get no Run button either.
 
 **RunnableExample** — a titled example with **example input**. Run feeds the
 `stdin` to the program (then end of input), so the output appears in one tap;

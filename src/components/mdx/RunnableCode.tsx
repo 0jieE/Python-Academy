@@ -18,6 +18,8 @@ export interface RunnableCodeProps {
   title?: string
   /** Example input: fed to the program (then end of input). */
   stdin?: string
+  /** False for fragments that aren't whole programs: Copy and Edit in IDE only. */
+  runnable?: boolean
 }
 
 /**
@@ -25,7 +27,7 @@ export interface RunnableCodeProps {
  * console under the code; input() pops up the input sheet. Nothing heavy loads
  * until Run is pressed.
  */
-export function RunnableCode({ children, title, stdin }: RunnableCodeProps) {
+export function RunnableCode({ children, title, stdin, runnable = true }: RunnableCodeProps) {
   const codeRef = useRef<HTMLDivElement>(null)
   const [code, setCode] = useState('')
   const [runs, setRuns] = useState(0)
@@ -67,7 +69,7 @@ export function RunnableCode({ children, title, stdin }: RunnableCodeProps) {
         <div className="code-run-bar code-run-head">
           <span className="min-w-0 flex-1 truncate pl-2 text-sm font-medium">{title}</span>
           {editLink}
-          {runButton}
+          {runnable && runButton}
         </div>
       )}
       <InsideRunnable value={true}>
@@ -86,7 +88,7 @@ export function RunnableCode({ children, title, stdin }: RunnableCodeProps) {
           </Button>
           {editLink}
           <span className="flex-1" />
-          {runButton}
+          {runnable && runButton}
         </div>
       )}
       {runs > 0 && (
@@ -108,12 +110,12 @@ function ConsoleLoading() {
   )
 }
 
-/** MDX `pre`: Python blocks become runnable; other languages stay as they are. */
-export function CodeBlock(props: ComponentProps<'pre'> & { 'data-language'?: string }) {
+/** MDX `pre`: Python blocks become runnable (unless marked `norun`); other languages stay as they are. */
+export function CodeBlock({ 'data-norun': norun, ...props }: ComponentProps<'pre'> & { 'data-language'?: string; 'data-norun'?: string }) {
   const inside = useContext(InsideRunnable)
   if (inside || props['data-language'] !== 'python') return <pre {...props} />
   return (
-    <RunnableCode>
+    <RunnableCode runnable={norun === undefined}>
       <pre {...props} />
     </RunnableCode>
   )

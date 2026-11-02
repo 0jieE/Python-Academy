@@ -40,7 +40,7 @@ print(area(3, 4))   # 12
 A function without `return` gives back `None`. A `return` ends the function
 immediately — handy for early exits:
 
-```python
+```python norun
 def is_prime(n):
     if n < 2:
         return False
@@ -64,7 +64,7 @@ print(greet("Ben", greeting="Hi"))     # Hi, Ben!
 
 Return several values as a tuple and unpack them:
 
-```python
+```python norun
 def min_max(a):
     return min(a), max(a)
 
@@ -87,7 +87,7 @@ Never use a list or dict as a default value: `def add(x, items=[])` shares
 
 `lambda` makes a tiny one-expression function, mostly used as a sort key:
 
-```python
+```python norun
 pairs = [("ana", 90), ("ben", 75), ("cy", 90)]
 pairs.sort(key=lambda p: (-p[1], p[0]))   # by score desc, then name
 ```
@@ -125,7 +125,7 @@ A function can call itself. Python stops very deep recursion (about 1000
 levels by default), so for deep cases use a loop instead, or raise the limit
 with `sys.setrecursionlimit` carefully.
 
-```python
+```python norun
 def fact(n):
     return 1 if n <= 1 else n * fact(n - 1)
 ```

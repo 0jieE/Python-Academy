@@ -95,6 +95,17 @@ test('problem filters live in the URL', async ({ page }) => {
   await expect(page).toHaveURL(/\/problems\?tag=sorting$/)
 })
 
+test('fragments marked norun have Edit in IDE but no Run', async ({ page }) => {
+  await page.goto('/learn/algorithms/binary-search')
+  const fragment = page.locator('.code-run').filter({ hasText: 'print(first_true(' })
+  await expect(fragment.getByRole('link', { name: 'Edit in IDE' })).toBeVisible()
+  await expect(fragment.getByRole('button', { name: 'Copy code' })).toBeVisible()
+  await expect(fragment.getByRole('button', { name: 'Run', exact: true })).toHaveCount(0)
+  // Whole programs on the same page still run.
+  const runnable = page.locator('.code-run').filter({ has: page.getByRole('button', { name: 'Run', exact: true }) })
+  expect(await runnable.count()).toBeGreaterThan(0)
+})
+
 test('marking a lesson complete survives a reload', async ({ page }) => {
   await page.goto('/learn/fundamentals/strings')
   await page.getByRole('button', { name: 'Mark as complete' }).click()

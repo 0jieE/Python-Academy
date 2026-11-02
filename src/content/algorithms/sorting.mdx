@@ -32,7 +32,7 @@ negate numbers that should go in descending order.
 
 ## The basics
 
-```python
+```python norun
 a = [5, 2, 9, 1]
 b = sorted(a)                 # new list: [1, 2, 5, 9]; a is unchanged
 a.sort(reverse=True)          # in place: a == [9, 5, 2, 1]
@@ -46,7 +46,7 @@ character by code, so `"Z" < "a"` and `"10" < "9"`.
 
 `key` is a function applied to each item; items are ordered by its result.
 
-```python
+```python norun
 words.sort(key=str.lower)             # case-insensitive
 words.sort(key=len)                   # by length
 pairs.sort(key=lambda p: p[1])        # by the second item
@@ -76,7 +76,7 @@ Negating only works for numbers. To sort strings descending and something
 else ascending, sort twice — Python's sort is **stable** (equal items keep
 their order), so sort by the secondary key first, then by the primary:
 
-```python
+```python norun
 people.sort(key=lambda p: p[1])                 # secondary: score ascending
 people.sort(key=lambda p: p[0], reverse=True)   # primary: name descending
 ```
@@ -85,7 +85,7 @@ people.sort(key=lambda p: p[0], reverse=True)   # primary: name descending
 
 When the answer needs the original positions, sort the **indexes**:
 
-```python
+```python norun
 a = [30, 10, 20]
 order = sorted(range(len(a)), key=lambda i: a[i])   # [1, 2, 0]
 ```
@@ -102,7 +102,7 @@ order = sorted(range(len(a)), key=lambda i: a[i])   # [1, 2, 0]
 
 Example — how many distinct values, using only sorting:
 
-```python
+```python norun
 a.sort()
 distinct = sum(1 for i in range(len(a)) if i == 0 or a[i] != a[i - 1])
 ```

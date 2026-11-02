@@ -32,7 +32,7 @@ from "no" to "yes", it stays "yes". Each step throws away half of what's left:
 
 ## bisect on a sorted list
 
-```python
+```python norun
 from bisect import bisect_left, bisect_right
 a = [10, 20, 20, 20, 30]
 bisect_left(a, 20)    # 1  first index with a[i] >= 20
@@ -70,7 +70,7 @@ Sort once (`O(N log N)`), then every question costs `O(log N)`.
 finds the **first** `x` in `[lo, hi]` where `ok(x)` is true, assuming `ok` is
 false … false, true … true:
 
-```python
+```python norun
 def first_true(lo, hi, ok):
     # answer is in [lo, hi]; hi must be a value where ok is true
     while lo < hi:
@@ -84,7 +84,7 @@ def first_true(lo, hi, ok):
 
 Example: the smallest `x` with `x * x ≥ 2·10^18`:
 
-```python
+```python norun
 print(first_true(0, 2 * 10 ** 9, lambda x: x * x >= 2 * 10 ** 18))
 ```
 
@@ -95,7 +95,7 @@ speed / limit such that something is still possible". If checking one
 candidate `x` is easy, and "possible for `x`" implies "possible for every
 smaller `x`", binary search over `x`:
 
-```python
+```python norun
 def last_true(lo, hi, ok):
     # ok(lo) is true; finds the largest x in [lo, hi] with ok(x)
     while lo < hi:

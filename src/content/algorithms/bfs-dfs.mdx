@@ -81,7 +81,7 @@ Use `deque.popleft()` — `list.pop(0)` is `O(N)` per call and turns BFS into
 
 ## BFS on a grid
 
-```python
+```python norun
 from collections import deque
 
 def grid_bfs(grid, sr, sc):
@@ -107,7 +107,7 @@ DFS goes as deep as possible before backing up. The recursive version is
 short, but recursion depth can reach `N` — about 1000 by default in Python.
 Use your own stack instead:
 
-```python
+```python norun
 def reachable(start, adj, seen):
     seen[start] = True
     stack = [start]
@@ -126,7 +126,7 @@ def reachable(start, adj, seen):
 
 Start a search from every node not seen yet. Each new start is a new component:
 
-```python
+```python norun
 seen = [False] * (n + 1)
 components = 0
 for v in range(1, n + 1):

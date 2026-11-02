@@ -10,11 +10,16 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import type { ShikiTransformer } from 'shiki'
 import { defineConfig } from 'vite'
 
-/** <pre data-language="python"> → the MDX `pre` component (RunnableCode) adds a Run button. */
+/**
+ * <pre data-language="python"> → the MDX `pre` component (RunnableCode) adds a Run button.
+ * ```python norun → <pre data-norun>: a fragment, shown with Copy and Edit in IDE only.
+ */
 const dataLanguage: ShikiTransformer = {
   name: 'data-language',
   pre(node) {
     node.properties.dataLanguage = this.options.lang
+    const meta = (this.options.meta as { __raw?: string } | undefined)?.__raw ?? ''
+    if (/(^|\s)norun(\s|$)/.test(meta)) node.properties.dataNorun = ''
   },
 }
 

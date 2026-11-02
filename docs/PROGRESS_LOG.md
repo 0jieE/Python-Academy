@@ -185,3 +185,11 @@ Gate for every ticket: `npm run check && npm run build`.
   - `playwright.config.ts` takes `BASE_URL` to test a deployed site. Smoke, runner and PWA specs against production: **141 passed**. That includes every route at 360 px, the tab bar, the interactive input sheet, lesson Run, all 22 editorials passing their samples, no Pyodide or editor on lesson pages before Run, progress surviving a reload, offline pages and offline Python.
   - Search for "split" returns 8 results, with no console errors.
 - **Left for a person:** test on real Android Chrome and iOS Safari (install, key bar, input sheet above the keyboard). Watch Render's bandwidth use on the free plan.
+
+## 2026-11-03: No Run button on code fragments
+
+- **What:** ```` ```python norun ```` marks a block that isn't a whole program. It keeps Copy and Edit in IDE but shows no Run button. The Shiki transformer in `vite.config.ts` turns the fence meta into `data-norun`, and `CodeBlock`/`RunnableCode` (`runnable` prop) hide Run.
+- **Which blocks:** every lesson, cheat-sheet and problem Python block was run in CPython with empty input. **60 blocks in 25 files** are marked `norun`: 36 that fail with `NameError` (they use `a`, `n`, `adj`, `words`… from earlier code) and 24 that print nothing (function definitions only, or values shown in comments). Blocks that read input, print output, or read all of stdin (`sys.stdin.read()` programs) keep Run. `RunnableExample` blocks are unchanged.
+- **Docs and tests:** `docs/AUTHORING.md` explains when to use `norun`. A new smoke test checks that a fragment has Copy and Edit in IDE but no Run.
+- **Verified:** `npm run check` ✔, `npm run build` ✔, `npm run test:e2e` **250 passed**. Checked in a screenshot at 360 px.
+- **Needs coach review:** the `norun` choice in each file. Some definition-only blocks (`is_prime`, `fact`, `gcd`, `sieve`) could instead get a `print(...)` line and keep Run.

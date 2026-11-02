@@ -55,7 +55,7 @@ Sorting is **stable**: equal keys keep their input order. To sort by a string
 key descending and another key ascending, sort twice — secondary key first,
 primary key last:
 
-```python
+```python norun
 people.sort(key=lambda p: p.age)                  # secondary
 people.sort(key=lambda p: p.name, reverse=True)   # primary
 ```
@@ -65,7 +65,7 @@ people.sort(key=lambda p: p.name, reverse=True)   # primary
 
 ## Useful built-ins
 
-```python
+```python norun
 print(*a)                          # 1 2 3
 for i, x in enumerate(a): ...      # index and value
 for x, y in zip(a, b): ...         # walk two lists together
@@ -77,7 +77,7 @@ a.sort(); a[len(a) // 2]           # median (odd length)
 
 ## Patterns after sorting
 
-```python
+```python norun
 a.sort()
 min(a[i + 1] - a[i] for i in range(n - 1))        # closest pair
 sum(1 for i in range(n) if i == 0 or a[i] != a[i - 1])   # distinct count

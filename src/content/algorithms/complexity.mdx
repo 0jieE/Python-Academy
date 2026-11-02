@@ -35,7 +35,7 @@ estimate is far above that, you need a different idea.
 Big-O describes how the work **grows** with the input size `N`, ignoring
 constant factors:
 
-```python
+```python norun
 for x in a:                 # O(N)        one pass
     ...
 
@@ -81,7 +81,7 @@ A single line can hide a loop:
 
 So this innocent-looking loop is `O(N^2)`:
 
-```python
+```python norun
 for x in a:
     if x in b:        # b is a list -> O(N) each time
         count += 1
@@ -127,7 +127,7 @@ About `N^2 / 2 = 5·10^9` checks — hundreds of seconds. No. Look for an
 <Exercise title="Spot the hidden loop">
 What is the complexity, and how do you fix it?
 
-```python
+```python norun
 res = 0
 for x in a:          # len(a) = N
     if x in seen:    # seen is a list of up to N numbers

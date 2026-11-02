@@ -107,7 +107,7 @@ With `i` at the start and `j` at the end of a sorted list: if
 `a[i] + a[j] ≤ K`, then `a[i]` pairs with **every** element from `i + 1` to `j`
 — that's `j - i` pairs at once. Then move `i`. Otherwise move `j`.
 
-```python
+```python norun
 a.sort()
 i, j, pairs = 0, len(a) - 1, 0
 while i < j:

@@ -12,7 +12,7 @@ We keep an interval `[lo, hi]` where `lo` always works and everything above
 `hi` fails. Start with `lo = 0` (meaning "nothing works yet"; that is also the
 answer for the impossible case) and `hi = max(a)`:
 
-```python
+```python norun
 def ok(length):
     return sum(x // length for x in a) >= k
 ```

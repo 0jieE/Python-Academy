@@ -46,7 +46,7 @@ Each call waits for the call it made. Python keeps these waiting calls on the
 **call stack**; `total([4, 1, 5])` is 4 calls deep. Python stops at about 1000
 levels with `RecursionError`. You can raise the limit:
 
-```python
+```python norun
 import sys
 sys.setrecursionlimit(10 ** 6)
 ```
@@ -55,7 +55,7 @@ Raising the limit lets the program try deeper recursion, but each level still
 uses memory, and very deep recursion can crash the interpreter. If the depth
 can reach `N = 10^5` or more, a **loop** (or your own stack list) is safer.
 
-```python
+```python norun
 def total_loop(nums):           # same result, no recursion depth
     s = 0
     for x in nums:
@@ -95,7 +95,7 @@ backtracking much faster in practice.
 
 Naive Fibonacci recomputes the same values again and again — exponential time:
 
-```python
+```python norun
 def fib(n):
     return n if n < 2 else fib(n - 1) + fib(n - 2)   # fib(35) takes seconds
 ```

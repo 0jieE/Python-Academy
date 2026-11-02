@@ -40,7 +40,7 @@ draft: false
 
 ## Characters and numbers
 
-```python
+```python norun
 ord("a")                         # 97
 chr(97)                          # 'a'
 ord(c) - ord("a")                # 0..25 position of a lower-case letter
@@ -50,7 +50,7 @@ bin(11)[2:], hex(255)[2:]        # '1011', 'ff'
 str(42), int("42")               # convert both ways
 ```
 
-```python
+```python norun
 import string
 string.ascii_lowercase           # 'abcdefghijklmnopqrstuvwxyz'
 string.digits                    # '0123456789'
@@ -58,7 +58,7 @@ string.digits                    # '0123456789'
 
 ## Building output
 
-```python
+```python norun
 "".join(chars)                   # list of characters -> string, O(total length)
 " ".join(map(str, nums))         # numbers separated by spaces
 "\n".join(lines)                 # one per line
@@ -79,7 +79,7 @@ Never build a long string with `+=` in a loop; append to a list and join.
 
 ## Common patterns
 
-```python
+```python norun
 s == s[::-1]                                  # palindrome
 sorted(s) == sorted(t)                        # anagram
 from collections import Counter
