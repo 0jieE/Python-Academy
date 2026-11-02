@@ -1,4 +1,7 @@
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+
 export default function ProgressPage() {
+  useDocumentTitle('My progress')
   // TODO(T11): completed lessons, attempted/solved-sample problems, export/import/reset.
   return (
     <div className="space-y-4">

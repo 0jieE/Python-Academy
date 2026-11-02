@@ -2,8 +2,10 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { manifest } from '@/content/registry'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function ProblemsIndexPage() {
+  useDocumentTitle('Practice problems')
   // TODO(T8): filters by difficulty/tag, solved-sample badges from progress.
   return (
     <div className="space-y-6">

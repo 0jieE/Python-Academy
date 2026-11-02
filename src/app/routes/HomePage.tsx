@@ -2,8 +2,10 @@ import { Link } from 'react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { findLessonById } from '@/content/registry'
 import { roadmap } from '@/data/roadmap'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function HomePage() {
+  useDocumentTitle()
   return (
     <div className="space-y-10">
       <section className="space-y-3">

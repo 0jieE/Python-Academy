@@ -1,6 +1,6 @@
 import { MDXProvider } from '@mdx-js/react'
 import type { MDXComponents } from 'mdx/types'
-import { use } from 'react'
+import { Suspense, use } from 'react'
 import { loadMdx } from '@/content/registry'
 import { Callout } from './Callout'
 
@@ -21,8 +21,16 @@ function getModule(path: string) {
   return p
 }
 
-/** Renders an MDX file by its manifest path. Wrap in <Suspense>. */
+/** Renders an MDX file by its manifest path; shows a placeholder while its chunk loads. */
 export function MdxContent({ sourcePath }: { sourcePath: string }) {
+  return (
+    <Suspense fallback={<p role="status" className="text-muted-foreground">Loading…</p>}>
+      <MdxBody sourcePath={sourcePath} />
+    </Suspense>
+  )
+}
+
+function MdxBody({ sourcePath }: { sourcePath: string }) {
   const { default: Content } = use(getModule(sourcePath))
   return (
     <MDXProvider components={mdxComponents}>

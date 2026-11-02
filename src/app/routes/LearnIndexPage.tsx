@@ -1,22 +1,21 @@
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { lessonsByCategory } from '@/content/registry'
+import { CATEGORY_TITLES, lessonsByCategory } from '@/content/registry'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
-const sections = [
-  { category: 'fundamentals', title: 'Python fundamentals' },
-  { category: 'algorithms', title: 'Competition techniques' },
-] as const
+const sections = (['fundamentals', 'algorithms'] as const).map((category) => ({ category, title: CATEGORY_TITLES[category] }))
 
 export default function LearnIndexPage() {
+  useDocumentTitle('Lessons')
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">Lessons</h1>
       {sections.map((s) => {
         const lessons = lessonsByCategory(s.category)
         return (
-          <section key={s.category} className="space-y-3">
-            <h2 className="text-lg font-semibold">{s.title}</h2>
+          <section key={s.category} id={s.category} aria-labelledby={`${s.category}-heading`} className="scroll-mt-20 space-y-3">
+            <h2 id={`${s.category}-heading`} className="text-lg font-semibold">{s.title}</h2>
             {lessons.length === 0 ? (
               <p className="text-sm text-muted-foreground">No lessons published yet.</p>
             ) : (

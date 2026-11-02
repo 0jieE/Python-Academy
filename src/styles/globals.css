@@ -32,6 +32,11 @@
   line-height: 1.6;
 }
 
+/* Headings focused after navigation (useFocusHeadingOnNavigate) need no ring. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
 /* ---- Lesson typography ---------------------------------------------------- */
 .lesson-prose :where(pre) {
   /* Shiki sets its own background; let typography stop overriding it. */

@@ -1,15 +1,19 @@
 import { useParams } from 'react-router'
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { MdxContent } from '@/components/mdx/MdxContent'
 import { findProblem } from '@/content/registry'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import NotFoundPage from './NotFoundPage'
 
 export default function ProblemPage() {
   const problem = findProblem(useParams().slug)
+  useDocumentTitle(problem?.title ?? 'Page not found')
   if (!problem) return <NotFoundPage />
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <article className="space-y-6">
+        <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Problems', to: '/problems' }, { label: problem.title }]} />
         <header>
           <p className="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-400">{problem.difficulty}</p>
           <h1 className="text-2xl font-bold">{problem.title}</h1>

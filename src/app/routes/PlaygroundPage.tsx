@@ -1,4 +1,7 @@
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+
 export default function PlaygroundPage() {
+  useDocumentTitle('Playground')
   // TODO(T9): lazy-load <Playground /> (Monaco + stdin box + Run/Stop + output panes).
   return (
     <div className="space-y-4">

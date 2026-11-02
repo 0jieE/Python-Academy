@@ -1,8 +1,10 @@
 import { Suspense } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router'
 import { SiteHeader } from '@/components/layout/SiteHeader'
+import { useFocusHeadingOnNavigate } from '@/hooks/useFocusHeadingOnNavigate'
 
 export function RootLayout() {
+  useFocusHeadingOnNavigate('main')
   return (
     <div className="flex min-h-dvh flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2">

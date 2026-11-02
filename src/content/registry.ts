@@ -22,6 +22,12 @@ export function loadMdx(sourcePath: string): Promise<MdxModule> {
   return loader()
 }
 
+export const CATEGORY_TITLES: Record<LessonEntry['category'], string> = {
+  fundamentals: 'Python fundamentals',
+  algorithms: 'Competition techniques',
+  'cheat-sheets': 'Cheat sheets',
+}
+
 export const lessonsByCategory = (category: LessonEntry['category']) =>
   manifest.lessons.filter((l) => l.category === category)
 
