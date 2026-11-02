@@ -33,3 +33,10 @@ Gate for every ticket: `npm run check && npm run build`.
 - **Verified (headless Chrome on preview):** editorial of `sum-of-two` passes 2/2 through the real "Run samples"; a solution that loops on sample 1 shows "Time limit" (2012 ms) and sample 2 still passes; CRLF expected output passes (unit test); 360 px: textarea editor, no horizontal scroll.
 - **Left undone:** `onSamplesChecked` is wired for T11 (progress) but not yet connected.
 - **Check by hand:** solve a problem on a phone — typing in the textarea, switching tabs, reading a failed sample's diff.
+
+## T7 — Search ✅
+- **Changed:** `scripts/build-search-index.ts` uses the Pagefind Node API: one custom record per lesson / cheat sheet / problem from MDX text (`remark-parse` + `remark-gfm` + `remark-mdx`, frontmatter/imports/JSX tags/expressions dropped, code kept; editorials not indexed), `meta {title, summary, kind}`, `filters {kind, level}` → `dist/pagefind`. `pagefindClient.ts` (lazy import of `/pagefind/pagefind.js`, retry after failure, excerpt parsed with DOMParser — no innerHTML), `SearchDialog.tsx` (Dialog + cmdk Command with `shouldFilter={false}`, kind badge, highlighted excerpt, dev-mode notice), header search button + Ctrl/⌘+K; the dialog chunk loads only on first open. Removed `src/features/search/README.md` (superseded by the code comments). New dev deps: `remark-parse`, `remark-mdx`, `mdast-util-to-string`, `unified`. Test: `scripts/build-search-index.test.ts`.
+- **Verified (preview, 1280 px and 360 px):** "split" → Input and Output + Fast I/O; "prefix" → Prefix Sums; "sys.stdin" → Fast I/O + Input and Output; results in ≈ 0.4–0.7 s; Enter navigates; Esc closes; lesson pages load no search files; `npm run dev` shows "Search works in the production build…".
+- **Bug fixed during testing:** after the result list changed, cmdk kept a stale highlighted item so Enter did nothing — the highlight now falls back to the first hit.
+- **Left undone:** none.
+- **Check by hand:** search on a phone (on-screen keyboard + tapping a result).
