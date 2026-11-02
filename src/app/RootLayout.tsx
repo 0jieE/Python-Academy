@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router'
 import { SiteHeader } from '@/components/layout/SiteHeader'
+import { StorageBanner } from '@/features/progress/StorageBanner'
 import { useFocusHeadingOnNavigate } from '@/hooks/useFocusHeadingOnNavigate'
 
 export function RootLayout() {
@@ -11,6 +12,7 @@ export function RootLayout() {
         Skip to content
       </a>
       <SiteHeader />
+      <StorageBanner />
       <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
           <Outlet />

@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { NavLink } from 'react-router'
+import { DoneMark } from '@/features/progress/LessonProgress'
 import { cn } from '@/lib/utils'
 
 export interface SidebarGroup {
@@ -8,7 +9,7 @@ export interface SidebarGroup {
 }
 
 /** Category lists with the current page highlighted. Shown from the `lg` breakpoint. */
-export function LessonSidebar({ groups, label }: { groups: SidebarGroup[]; label: string }) {
+export function LessonSidebar({ groups, label, completedIds = [] }: { groups: SidebarGroup[]; label: string; completedIds?: string[] }) {
   const baseId = useId()
   return (
     <aside className="hidden lg:block">
@@ -25,12 +26,13 @@ export function LessonSidebar({ groups, label }: { groups: SidebarGroup[]; label
                     to={item.url}
                     className={({ isActive }) =>
                       cn(
-                        'block rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+                        'flex items-center justify-between gap-2 rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
                         isActive && 'bg-muted font-medium text-foreground',
                       )
                     }
                   >
                     {item.title}
+                    <DoneMark done={completedIds.includes(item.id)} />
                   </NavLink>
                 </li>
               ))}

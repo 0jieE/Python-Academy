@@ -5,6 +5,8 @@ import { PrevNext } from '@/components/layout/PrevNext'
 import { MdxContent } from '@/components/mdx/MdxContent'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CATEGORY_TITLES, findLesson, findProblem, lessonsByCategory, manifest } from '@/content/registry'
+import { LessonCompleteButton } from '@/features/progress/LessonProgress'
+import { useProgress, useRecordLessonVisit } from '@/features/progress/useProgress'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { neighbours } from '@/lib/neighbours'
 import NotFoundPage from './NotFoundPage'
@@ -17,15 +19,16 @@ export default function LessonPage() {
   const { category, slug } = useParams()
   const lesson = findLesson(category, slug)
   useDocumentTitle(lesson?.title ?? 'Page not found')
+  useRecordLessonVisit(lesson)
+  const { progress } = useProgress()
   if (!lesson) return <NotFoundPage />
 
   // Fundamentals then algorithms, each sorted by `order` (manifest order).
   const { prev, next } = neighbours(manifest.lessons, lesson.id)
 
-  // TODO(T11): mark lastVisitedLesson + "Mark as complete" button via progress store.
   return (
     <div className="lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10">
-      <LessonSidebar label="Lessons" groups={sidebarGroups} />
+      <LessonSidebar label="Lessons" groups={sidebarGroups} completedIds={progress.completedLessonIds} />
       <article className="mx-auto w-full max-w-3xl min-w-0 space-y-6">
         <Breadcrumbs
           items={[
@@ -72,6 +75,11 @@ export default function LessonPage() {
             </Card>
           </aside>
         )}
+
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <LessonCompleteButton lessonId={lesson.id} />
+          <p className="text-xs text-muted-foreground">Saved in this browser only.</p>
+        </div>
 
         <PrevNext prev={prev} next={next} />
       </article>

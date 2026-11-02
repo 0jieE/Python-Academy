@@ -2,10 +2,16 @@ import { Link } from 'react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { findLessonById } from '@/content/registry'
 import { roadmap } from '@/data/roadmap'
+import { DoneMark } from '@/features/progress/LessonProgress'
+import { useProgress } from '@/features/progress/useProgress'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export default function HomePage() {
   useDocumentTitle()
+  const { progress } = useProgress()
+  const last = progress.lastVisitedLesson && findLessonById(progress.lastVisitedLesson.id)
+  const firstLesson = roadmap.flatMap((s) => s.lessonIds).map(findLessonById).find(Boolean)
+  const resume = last || firstLesson
   return (
     <div className="space-y-10">
       <section className="space-y-3">
@@ -13,7 +19,18 @@ export default function HomePage() {
         <p className="max-w-2xl text-muted-foreground">
           Follow the roadmap, read short lessons, and run Python right in your browser — no install needed.
         </p>
-        {/* TODO(T11): "Continue where you left off" card from progress.lastVisitedLesson */}
+        {resume && (
+          <Card className="max-w-xl">
+            <CardHeader>
+              <CardDescription>{last ? 'Continue where you left off' : 'Start here'}</CardDescription>
+              <CardTitle className="text-lg">
+                <Link to={resume.url} className="underline-offset-4 hover:underline">
+                  {resume.title} →
+                </Link>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        )}
       </section>
 
       <section aria-labelledby="roadmap-heading" className="space-y-6">
@@ -31,10 +48,13 @@ export default function HomePage() {
               {stage.lessonIds.map((id, i) => {
                 const lesson = findLessonById(id)
                 return (
-                  <li key={id} className="text-sm">
-                    <span className="mr-2 text-muted-foreground">{i + 1}.</span>
+                  <li key={id} className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">{i + 1}.</span>
                     {lesson ? (
-                      <Link className="underline-offset-4 hover:underline" to={lesson.url}>{lesson.title}</Link>
+                      <>
+                        <Link className="underline-offset-4 hover:underline" to={lesson.url}>{lesson.title}</Link>
+                        <DoneMark done={progress.completedLessonIds.includes(id)} />
+                      </>
                     ) : (
                       <span className="text-muted-foreground">{id} · coming soon</span>
                     )}

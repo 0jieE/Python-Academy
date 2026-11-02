@@ -5,13 +5,18 @@ import { Badge } from '@/components/ui/badge'
 import { findProblem } from '@/content/registry'
 import { PracticeWorkbench } from '@/features/practice/PracticeWorkbench'
 import { Editorial, Hints } from '@/features/practice/ProblemHelp'
+import { DoneMark } from '@/features/progress/LessonProgress'
+import { problemStatus, recordSampleRun } from '@/features/progress/progressOps'
+import { useProgress } from '@/features/progress/useProgress'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import NotFoundPage from './NotFoundPage'
 
 export default function ProblemPage() {
   const problem = findProblem(useParams().slug)
   useDocumentTitle(problem?.title ?? 'Page not found')
+  const { progress, update } = useProgress()
   if (!problem) return <NotFoundPage />
+  const status = problemStatus(progress, problem.id)
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
@@ -25,6 +30,12 @@ export default function ProblemPage() {
             ))}
           </div>
           <h1 className="text-2xl font-bold">{problem.title}</h1>
+          {status !== 'new' && (
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <DoneMark done={status === 'solved'} label="Solved" />
+              {status === 'solved' ? 'You passed all samples (saved in this browser).' : 'Attempted — not all samples passed yet.'}
+            </p>
+          )}
         </header>
         <MdxContent sourcePath={problem.statementPath} />
         <section className="space-y-4 text-sm">
@@ -64,7 +75,11 @@ export default function ProblemPage() {
         {problem.source && <p className="text-xs text-muted-foreground">Source: {problem.source}</p>}
       </article>
       <div className="min-w-0">
-        <PracticeWorkbench key={problem.id} problem={problem} />
+        <PracticeWorkbench
+          key={problem.id}
+          problem={problem}
+          onSamplesChecked={(passed) => update((p) => recordSampleRun(p, problem.id, passed))}
+        />
       </div>
     </div>
   )
