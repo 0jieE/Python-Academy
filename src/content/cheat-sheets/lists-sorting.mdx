@@ -1,0 +1,92 @@
+---
+id: cs-lists-sorting
+slug: lists-sorting
+title: Lists and Sorting
+summary: List operations with their costs, comprehensions, and sorting with key= for every tie-break rule.
+category: cheat-sheets
+level: beginner
+order: 30
+prerequisites: []
+learningObjectives: []
+tags: [lists, sorting, sort, sorted, key, lambda, comprehension, complexity]
+draft: false
+---
+
+## Creating
+
+```python
+a = list(map(int, input().split()))      # from one input line
+a = [0] * n                              # n zeros
+grid = [[0] * m for _ in range(n)]       # n × m grid (NOT [[0] * m] * n)
+squares = [x * x for x in a]             # comprehension
+evens = [x for x in a if x % 2 == 0]     # with a filter
+pairs = list(zip(names, scores))         # combine two lists
+```
+
+## Operations and their cost
+
+| Code | Cost |
+| --- | --- |
+| `a[i]`, `a[i] = x`, `len(a)` | O(1) |
+| `a.append(x)`, `a.pop()` | O(1) |
+| `a.pop(0)`, `a.insert(0, x)` | O(N) — use `collections.deque` |
+| `x in a`, `a.index(x)`, `a.count(x)`, `a.remove(x)` | O(N) |
+| `sum(a)`, `min(a)`, `max(a)` | O(N) |
+| `a[l:r]` (copy), `a + b`, `a[:]` | O(length) |
+| `a.reverse()`, `a[::-1]` | O(N) |
+| `a.sort()`, `sorted(a)` | O(N log N) |
+
+## Sorting
+
+| Want | Code |
+| --- | --- |
+| ascending (new list) | `sorted(a)` |
+| ascending (in place) | `a.sort()` — returns `None` |
+| descending | `sorted(a, reverse=True)` |
+| by length | `sorted(words, key=len)` |
+| case-insensitive | `sorted(words, key=str.lower)` |
+| by 2nd item of pairs | `sorted(pairs, key=lambda p: p[1])` |
+| score desc, then name asc | `sorted(pairs, key=lambda p: (-p[1], p[0]))` |
+| by length, then alphabetical | `sorted(words, key=lambda w: (len(w), w))` |
+| indexes by value | `sorted(range(n), key=lambda i: a[i])` |
+| by absolute value | `sorted(a, key=abs)` |
+
+Sorting is **stable**: equal keys keep their input order. To sort by a string
+key descending and another key ascending, sort twice — secondary key first,
+primary key last:
+
+```python
+people.sort(key=lambda p: p.age)                  # secondary
+people.sort(key=lambda p: p.name, reverse=True)   # primary
+```
+
+`from operator import itemgetter` gives a slightly faster key:
+`pairs.sort(key=itemgetter(1, 0))`.
+
+## Useful built-ins
+
+```python
+print(*a)                          # 1 2 3
+for i, x in enumerate(a): ...      # index and value
+for x, y in zip(a, b): ...         # walk two lists together
+any(x < 0 for x in a)              # True if some x < 0
+all(x > 0 for x in a)              # True if every x > 0
+max(a, key=len)                    # longest item
+a.sort(); a[len(a) // 2]           # median (odd length)
+```
+
+## Patterns after sorting
+
+```python
+a.sort()
+min(a[i + 1] - a[i] for i in range(n - 1))        # closest pair
+sum(1 for i in range(n) if i == 0 or a[i] != a[i - 1])   # distinct count
+
+# two pointers on sorted data: is there a pair with sum t?
+i, j = 0, n - 1
+while i < j:
+    s = a[i] + a[j]
+    if s == t: break
+    if s < t: i += 1
+    else: j -= 1
+```

@@ -18,7 +18,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'n = int(input())\nnums = list(map(int, input().split()))\n',
-  relatedLessonIds: ['fund-lists'],
+  relatedLessonIds: ['fund-lists', 'algo-sorting'],
   source: 'Original problem',
 }
 

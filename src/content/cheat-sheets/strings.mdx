@@ -1,0 +1,92 @@
+---
+id: cs-strings
+slug: strings
+title: Strings
+summary: Slicing, searching, converting and building strings — the methods you reach for in contests.
+category: cheat-sheets
+level: beginner
+order: 20
+prerequisites: []
+learningObjectives: []
+tags: [strings, slicing, split, join, ord, chr, format, f-string]
+draft: false
+---
+
+## Slicing
+
+| Code | Result for `s = "abcdef"` |
+| --- | --- |
+| `s[0]`, `s[-1]` | `'a'`, `'f'` |
+| `s[1:4]` | `'bcd'` (stop is excluded) |
+| `s[:3]`, `s[3:]` | `'abc'`, `'def'` |
+| `s[::2]` | `'ace'` |
+| `s[::-1]` | `'fedcba'` (reverse) |
+| `len(s)` | `6` |
+
+## Methods (all return new strings)
+
+| Code | Does | Cost |
+| --- | --- | --- |
+| `s.strip()` / `s.rstrip("\n")` | remove whitespace at the ends | O(N) |
+| `s.split()` | words, any whitespace | O(N) |
+| `s.split(",")` | split on a separator | O(N) |
+| `s.lower()`, `s.upper()` | change case | O(N) |
+| `s.count(t)` | non-overlapping occurrences | O(N·len t) worst |
+| `s.find(t)` | first index or `-1` | O(N·len t) worst |
+| `s.replace(a, b)` | replace all | O(N) |
+| `s.startswith(t)`, `s.endswith(t)` | prefix / suffix test | O(len t) |
+| `s.isdigit()`, `s.isalpha()`, `s.isalnum()` | character class tests | O(N) |
+| `t in s` | substring test | O(N·len t) worst |
+
+## Characters and numbers
+
+```python
+ord("a")                         # 97
+chr(97)                          # 'a'
+ord(c) - ord("a")                # 0..25 position of a lower-case letter
+chr((ord(c) - 97 + k) % 26 + 97) # Caesar shift by k
+int("1011", 2)                   # 11  (parse binary)
+bin(11)[2:], hex(255)[2:]        # '1011', 'ff'
+str(42), int("42")               # convert both ways
+```
+
+```python
+import string
+string.ascii_lowercase           # 'abcdefghijklmnopqrstuvwxyz'
+string.digits                    # '0123456789'
+```
+
+## Building output
+
+```python
+"".join(chars)                   # list of characters -> string, O(total length)
+" ".join(map(str, nums))         # numbers separated by spaces
+"\n".join(lines)                 # one per line
+"-" * 10                         # '----------'
+```
+
+Never build a long string with `+=` in a loop; append to a list and join.
+
+## Formatting
+
+| Code | Output |
+| --- | --- |
+| `f"{x:.2f}"` | `3.14` (2 decimals) |
+| `f"{n:05d}"` | `00042` (zero-padded width 5) |
+| `f"{n:>5}"` / `f"{n:<5}"` | right / left aligned in width 5 |
+| `f"{n:,}"` | `1,234,567` |
+| `f"{h}:{m:02d}"` | `2:05` |
+
+## Common patterns
+
+```python
+s == s[::-1]                                  # palindrome
+sorted(s) == sorted(t)                        # anagram
+from collections import Counter
+Counter(s).most_common(1)                     # most frequent character
+"".join(ch for ch in s if ch.isalpha())       # keep only letters
+s.split()[::-1]                               # words in reverse order
+```
+
+Strings are **immutable**: to change characters, convert to a list
+(`chars = list(s)`), edit it, then `"".join(chars)`.

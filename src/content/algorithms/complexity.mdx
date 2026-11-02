@@ -1,0 +1,160 @@
+---
+id: algo-complexity
+slug: complexity
+title: Time Complexity
+summary: Estimate from the constraints whether an idea is fast enough — before you write any code.
+category: algorithms
+level: intermediate
+order: 10
+prerequisites: [fund-loops, fund-lists]
+learningObjectives:
+  - Read Big-O for common loop shapes
+  - Turn the constraints of a problem into an operation budget
+  - Know the cost of common Python operations
+  - Recognise when Python needs a faster idea, not faster code
+tags: [complexity, big-o, time-limit, performance, constraints]
+practiceProblems: [range-sum-queries, ribbon-cutting]
+draft: false
+---
+
+## Why this matters
+
+A correct solution that is too slow still gets **Time Limit Exceeded**. In a
+contest you can't afford to code an idea, submit, and only then find out. The
+constraints in the statement tell you, before you start, which ideas can
+possibly pass.
+
+<KeyIdea>
+Plug the largest `N` into your idea's Big-O. Python manages roughly
+**10^7 simple operations per second** — less in the browser playground. If the
+estimate is far above that, you need a different idea.
+</KeyIdea>
+
+## Big-O in one minute
+
+Big-O describes how the work **grows** with the input size `N`, ignoring
+constant factors:
+
+```python
+for x in a:                 # O(N)        one pass
+    ...
+
+for i in range(n):          # O(N^2)      every pair
+    for j in range(n):
+        ...
+
+a.sort()                    # O(N log N)  sorting
+
+while n > 0:                # O(log N)    halving each step
+    n //= 2
+```
+
+Sequential steps add up and the biggest term wins: a sort followed by a loop
+is `O(N log N + N)` = `O(N log N)`. Nested loops multiply.
+
+## From constraints to an algorithm
+
+| Largest N | Fits roughly | Typical idea |
+| --- | --- | --- |
+| ≤ 10 | <Complexity time="O(N!)" /> | try every order (permutations) |
+| ≤ 20 | <Complexity time="O(2^N)" /> | try every subset |
+| ≤ 500 | <Complexity time="O(N^3)" /> | three nested loops (tight in Python) |
+| ≤ 5 000 | <Complexity time="O(N^2)" /> | every pair, simple DP |
+| ≤ 2·10^5 | <Complexity time="O(N log N)" /> | sort, binary search, heap |
+| ≤ 10^6 | <Complexity time="O(N)" /> | one pass, prefix sums, two pointers |
+| ≤ 10^18 | <Complexity time="O(log N)" /> or O(1) | math formula, binary search, fast power |
+
+These are rough guides for Python. C++ solutions can afford about 10–50 times
+more, which is why some problems are harder in Python.
+
+## Hidden costs in Python
+
+A single line can hide a loop:
+
+| Code | Cost |
+| --- | --- |
+| `x in a_list`, `a.index(x)`, `a.count(x)` | <Complexity time="O(N)" /> |
+| `x in a_set`, `d[key]` | <Complexity time="O(1)" /> average |
+| `a[i:j]` (slice copy), `s + t` (string concat) | <Complexity time="O(length)" /> |
+| `a.pop(0)`, `a.insert(0, x)` | <Complexity time="O(N)" /> — use `collections.deque` |
+| `sum(a)`, `min(a)`, `max(a)`, `sorted(a)` | O(N), O(N), O(N), O(N log N) |
+
+So this innocent-looking loop is `O(N^2)`:
+
+```python
+for x in a:
+    if x in b:        # b is a list -> O(N) each time
+        count += 1
+```
+
+Making `b` a set first (`b = set(b)`) turns it into `O(N)`.
+
+## Example: estimating before coding
+
+> `N ≤ 2·10^5`. For each `i`, count how many `j > i` have `a[j] < a[i]`.
+
+- Every pair: `N^2 / 2 = 2·10^10` → far too slow.
+- Sort-based or binary-search idea: `N log N ≈ 2·10^5 · 18 = 3.6·10^6` → fine.
+
+So go straight for an `O(N log N)` idea.
+
+## Common mistakes
+
+- Ignoring the constraints and coding the first idea that works on the sample.
+- Calling `O(N)` operations (`in` on a list, `pop(0)`, slicing) inside a loop.
+- Building output with `+=` on a string in a loop.
+- Thinking "it passed the sample, so it's fast" — samples are tiny.
+
+## Competition use
+
+1. Read the constraints first. Write down the budget (`N`, and `N log N` or `N^2`).
+2. Pick an idea that fits. Only then start coding.
+3. If it's close, use the fast-I/O patterns and put the code in `main()`.
+
+## Exercises
+
+<Exercise title="Estimate it">
+`N ≤ 10^5`. An idea checks every pair `(i, j)`. Is it fast enough in Python?
+
+<Answer>
+
+About `N^2 / 2 = 5·10^9` checks — hundreds of seconds. No. Look for an
+`O(N log N)` or `O(N)` idea.
+
+</Answer>
+</Exercise>
+
+<Exercise title="Spot the hidden loop">
+What is the complexity, and how do you fix it?
+
+```python
+res = 0
+for x in a:          # len(a) = N
+    if x in seen:    # seen is a list of up to N numbers
+        res += 1
+    seen.append(x)
+```
+
+<Answer>
+
+`O(N^2)`: `x in seen` scans the list. Make `seen` a set and use
+`seen.add(x)` — the loop becomes `O(N)`.
+
+</Answer>
+</Exercise>
+
+<Exercise title="Which idea fits?">
+`N ≤ 20`, and you must choose some of the `N` items so their total weight is
+exactly `W`. Which approach from the table fits?
+
+<Answer>
+
+`2^20 ≈ 10^6` subsets — trying every subset is fine. (With `N ≤ 10^5` you would
+need a completely different approach.)
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Sorting — the most useful `O(N log N)` tool.

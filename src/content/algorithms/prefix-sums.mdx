@@ -5,28 +5,209 @@ title: Prefix Sums
 summary: Answer many range-sum questions in O(1) each after one O(N) pass.
 category: algorithms
 level: intermediate
-order: 40
-prerequisites: [fund-input-output]
+order: 60
+prerequisites: [algo-complexity, fund-lists]
 learningObjectives:
-  - Build a prefix-sum array
+  - Build a prefix-sum array with a leading zero
   - Answer sum(l..r) queries in O(1)
-tags: [prefix-sum, arrays, queries, complexity]
+  - Count subarrays with a given sum using prefix sums and a dict
+  - Apply the same idea to counts and 2D grids
+tags: [prefix-sum, arrays, queries, cumulative, subarray, complexity]
 practiceProblems: [range-sum-queries]
 draft: false
 ---
 
-<Callout type="todo">
-Placeholder lesson so the algorithms section renders. Replace with the full
-lesson using the template sections from "Input and Output".
-</Callout>
+## Why this matters
 
-## Idea
+"What is the sum from position `l` to `r`?" — asked once, a loop is fine.
+Asked `Q = 2·10^5` times on an array of `N = 2·10^5` values, the loop costs
+`4·10^10` steps. Prefix sums answer every question in constant time after a
+single pass, and the same trick powers many medium-level problems.
+
+<KeyIdea>
+Store running totals with a **leading zero**: `prefix[i]` = sum of the first
+`i` values. Then `sum(a[l..r]) = prefix[r + 1] - prefix[l]` (0-based) — one
+subtraction per query.
+</KeyIdea>
+
+## Building the array
 
 ```python
+a = [3, 1, 4, 1, 5]
+prefix = [0] * (len(a) + 1)
+for i, x in enumerate(a):
+    prefix[i + 1] = prefix[i] + x
+# prefix == [0, 3, 4, 8, 9, 14]
+```
+
+`itertools.accumulate` does the same in one line:
+
+```python
+from itertools import accumulate
+prefix = [0, *accumulate(a)]
+```
+
+## Answering range queries
+
+| Indexing in the problem | Sum of positions l..r (inclusive) |
+| --- | --- |
+| 0-based | `prefix[r + 1] - prefix[l]` |
+| 1-based (most statements) | `prefix[r] - prefix[l - 1]` |
+
+The leading zero means `l = 0` (or `l = 1`) needs no special case.
+
+<RunnableExample title="Range sums, 1-based" stdin={"5 3\n3 1 4 1 5\n1 5\n2 4\n3 3\n"}>
+
+```python
+import sys
+data = sys.stdin.read().split()
+n, q = int(data[0]), int(data[1])
 prefix = [0] * (n + 1)
 for i in range(n):
-    prefix[i + 1] = prefix[i] + a[i]
-
-# sum of a[l..r] (0-based, inclusive)
-total = prefix[r + 1] - prefix[l]
+    prefix[i + 1] = prefix[i] + int(data[2 + i])
+out = []
+for k in range(q):
+    l, r = int(data[2 + n + 2 * k]), int(data[3 + n + 2 * k])
+    out.append(prefix[r] - prefix[l - 1])
+print("\n".join(map(str, out)))
 ```
+
+</RunnableExample>
+
+Cost: <Complexity time="O(N + Q)" space="O(N)" /> instead of `O(N · Q)`.
+
+## Counting, not just summing
+
+Prefix sums work for anything you can add up. "How many vowels between `l`
+and `r`?" → build a prefix array over `1` (vowel) / `0` (not a vowel):
+
+```python
+s = input()
+pv = [0] * (len(s) + 1)
+for i, ch in enumerate(s):
+    pv[i + 1] = pv[i] + (ch in "aeiou")
+```
+
+## Subarrays with sum K
+
+A subarray `a[l..r]` has sum `K` exactly when `prefix[r + 1] - prefix[l] = K`.
+Walk left to right, and count how many earlier prefix values equal
+`current - K` using a dictionary:
+
+```python
+from collections import defaultdict
+
+def count_subarrays(a, k):
+    seen = defaultdict(int)
+    seen[0] = 1               # the empty prefix
+    cur = 0
+    total = 0
+    for x in a:
+        cur += x
+        total += seen[cur - k]
+        seen[cur] += 1
+    return total
+
+print(count_subarrays([1, 2, 1, 2, 1], 3))   # 4
+```
+
+This works with negative numbers too, in <Complexity time="O(N)" />.
+
+## 2D prefix sums
+
+For a grid, `P[i][j]` = sum of the rectangle from `(0, 0)` to `(i-1, j-1)`:
+
+```python
+P = [[0] * (cols + 1) for _ in range(rows + 1)]
+for i in range(rows):
+    for j in range(cols):
+        P[i + 1][j + 1] = g[i][j] + P[i][j + 1] + P[i + 1][j] - P[i][j]
+
+# sum of rows r1..r2, columns c1..c2 (0-based, inclusive)
+s = P[r2 + 1][c2 + 1] - P[r1][c2 + 1] - P[r2 + 1][c1] + P[r1][c1]
+```
+
+## Common mistakes
+
+- Off-by-one: mixing 0-based and 1-based formulas. Write the formula for the
+  statement's indexing once and test it on `l = r` and on the full range.
+- No leading zero, then a special case for `l = 0` that is wrong.
+- Rebuilding the prefix array inside the query loop — that's `O(N · Q)` again.
+- Prefix sums don't help when the array **changes** between queries (that
+  needs a Fenwick tree — a later topic).
+
+## Competition use
+
+- Many range-sum queries on a fixed array → prefix sums.
+- "Count subarrays with sum / balance K" → prefix sums + dict.
+- Read input in one go (`sys.stdin`) and join the output; with `2·10^5`
+  queries, I/O is often the slowest part.
+
+## Exercises
+
+<Exercise title="Best window">
+Read `N` and `K`, then `N` integers. Print the largest sum of `K` consecutive
+numbers.
+
+<Answer>
+
+```python
+n, k = map(int, input().split())
+a = list(map(int, input().split()))
+p = [0] * (n + 1)
+for i in range(n):
+    p[i + 1] = p[i] + a[i]
+print(max(p[i + k] - p[i] for i in range(n - k + 1)))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Equilibrium index">
+Read `N` integers. Print the first 1-based position `i` where the sum of the
+numbers before it equals the sum after it, or `-1` if there is none.
+
+<Answer>
+
+```python
+n = int(input())
+a = list(map(int, input().split()))
+total = sum(a)
+left = 0
+answer = -1
+for i, x in enumerate(a):
+    if left == total - left - x:
+        answer = i + 1
+        break
+    left += x
+print(answer)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Vowel queries">
+Read a word, then `Q` queries `l r` (1-based). For each, print how many vowels
+are in positions `l..r`.
+
+<Answer>
+
+```python
+s = input().strip()
+pv = [0] * (len(s) + 1)
+for i, ch in enumerate(s):
+    pv[i + 1] = pv[i] + (ch in "aeiou")
+q = int(input())
+out = []
+for _ in range(q):
+    l, r = map(int, input().split())
+    out.append(pv[r] - pv[l - 1])
+print("\n".join(map(str, out)))
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Two pointers — another way to turn `O(N^2)` into `O(N)` on sorted data.

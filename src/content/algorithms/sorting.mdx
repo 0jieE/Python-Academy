@@ -1,0 +1,196 @@
+---
+id: algo-sorting
+slug: sorting
+title: Sorting
+summary: Sort with custom keys, break ties correctly, and recognise problems that become easy once the data is sorted.
+category: algorithms
+level: intermediate
+order: 40
+prerequisites: [algo-complexity, fund-functions]
+learningObjectives:
+  - Use sorted() and list.sort() with key= and reverse=
+  - Sort by several criteria, some ascending and some descending
+  - Sort indexes instead of values when positions matter
+  - Spot problems where sorting first makes the rest O(N)
+tags: [sorting, sort, sorted, key, lambda, tie-break, greedy]
+practiceProblems: [ranking-board, two-sum-sorted, second-largest]
+draft: false
+---
+
+## Why this matters
+
+Sorting is the most common first step in contest solutions. Once the data is
+in order, many problems turn into one simple pass: closest pairs are
+neighbours, the k-th smallest is at index `k-1`, and two pointers become
+possible. Python's sort is fast and stable — you just need to tell it **what**
+to sort by.
+
+<KeyIdea>
+Use `key=` to say what to sort by. For several criteria, return a **tuple**;
+negate numbers that should go in descending order.
+</KeyIdea>
+
+## The basics
+
+```python
+a = [5, 2, 9, 1]
+b = sorted(a)                 # new list: [1, 2, 5, 9]; a is unchanged
+a.sort(reverse=True)          # in place: a == [9, 5, 2, 1]
+words = sorted(["pear", "Fig", "apple"])   # ['Fig', 'apple', 'pear'] — upper case first!
+```
+
+Both cost <Complexity time="O(N log N)" />. Strings sort character by
+character by code, so `"Z" < "a"` and `"10" < "9"`.
+
+## Sorting with a key
+
+`key` is a function applied to each item; items are ordered by its result.
+
+```python
+words.sort(key=str.lower)             # case-insensitive
+words.sort(key=len)                   # by length
+pairs.sort(key=lambda p: p[1])        # by the second item
+```
+
+## Several criteria
+
+Tuples compare item by item, so a tuple key sorts by the first item, then
+breaks ties with the second:
+
+<RunnableExample title="Score descending, name ascending" stdin={"4\nlia 90\nben 75\nana 90\ncy 80\n"}>
+
+```python
+n = int(input())
+people = []
+for _ in range(n):
+    name, score = input().split()
+    people.append((name, int(score)))
+people.sort(key=lambda p: (-p[1], p[0]))
+for name, score in people:
+    print(name, score)
+```
+
+</RunnableExample>
+
+Negating only works for numbers. To sort strings descending and something
+else ascending, sort twice — Python's sort is **stable** (equal items keep
+their order), so sort by the secondary key first, then by the primary:
+
+```python
+people.sort(key=lambda p: p[1])                 # secondary: score ascending
+people.sort(key=lambda p: p[0], reverse=True)   # primary: name descending
+```
+
+## Sorting positions
+
+When the answer needs the original positions, sort the **indexes**:
+
+```python
+a = [30, 10, 20]
+order = sorted(range(len(a)), key=lambda i: a[i])   # [1, 2, 0]
+```
+
+## Problems that sorting makes easy
+
+| After sorting… | You can… |
+| --- | --- |
+| the closest pair is adjacent | check only neighbours, O(N) |
+| equal values are together | count groups in one pass |
+| the k-th smallest is `a[k-1]` | answer directly |
+| small and large values are at the two ends | use two pointers |
+| "pick the cheapest first" greedy | iterate in order |
+
+Example — how many distinct values, using only sorting:
+
+```python
+a.sort()
+distinct = sum(1 for i in range(len(a)) if i == 0 or a[i] != a[i - 1])
+```
+
+## Common mistakes
+
+- `a = a.sort()` — `sort()` returns `None`.
+- Sorting numbers that are still strings (`"10" < "9"`). Convert with `int` first.
+- Forgetting the tie-break rule from the statement.
+- `reverse=True` reverses **every** criterion, not just the first.
+- Sorting inside a loop — each sort is `O(N log N)`.
+
+## Competition use
+
+- Sort once, near the start, then solve with a single pass.
+- Read the tie-break rule carefully and turn it into a tuple key.
+- For huge inputs, sorting `10^6` integers in Python takes well under a second.
+
+## Exercises
+
+<Exercise title="Sort by length, then alphabetically">
+Read a line of words. Print them sorted by length (shortest first); words of
+the same length in alphabetical order.
+
+<Answer>
+
+```python
+words = input().split()
+print(*sorted(words, key=lambda w: (len(w), w)))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="K-th largest">
+Read `N` and `K`, then `N` integers. Print the `K`-th largest value (`K = 1`
+is the maximum; equal values count separately).
+
+<Answer>
+
+```python
+n, k = map(int, input().split())
+a = sorted(map(int, input().split()), reverse=True)
+print(a[k - 1])
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Minimum total waiting">
+`N` students wait in line at one printer; student `i` needs `t_i` minutes. Each
+student waits for everyone before them. Choose the order that minimises the
+**sum** of waiting times and print that sum.
+
+<Answer>
+
+Serve the shortest jobs first.
+
+```python
+n = int(input())
+t = sorted(map(int, input().split()))
+total = 0
+elapsed = 0
+for x in t:
+    total += elapsed
+    elapsed += x
+print(total)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Original positions">
+Read `N` integers and print the 1-based positions of the values from smallest
+to largest (equal values keep their input order).
+
+<Answer>
+
+```python
+n = int(input())
+a = list(map(int, input().split()))
+order = sorted(range(n), key=lambda i: a[i])
+print(*[i + 1 for i in order])
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Prefix sums — answer range questions in O(1).

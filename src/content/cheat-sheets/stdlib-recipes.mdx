@@ -1,0 +1,130 @@
+---
+id: cs-stdlib-recipes
+slug: stdlib-recipes
+title: Standard Library Recipes
+summary: collections, heapq, bisect and math — ready-to-use contest recipes with their complexity.
+category: cheat-sheets
+level: intermediate
+order: 40
+prerequisites: []
+learningObjectives: []
+tags: [collections, counter, defaultdict, deque, heapq, bisect, math, gcd, itertools]
+draft: false
+---
+
+Everything here is in Python's standard library — always available in
+contests, nothing to install.
+
+## collections
+
+```python
+from collections import Counter, defaultdict, deque
+```
+
+| Recipe | Code | Cost |
+| --- | --- | --- |
+| count items | `c = Counter(words)` | O(N) |
+| count of x (0 if missing) | `c[x]` | O(1) |
+| top k | `c.most_common(k)` | O(N log k) |
+| group values | `g = defaultdict(list)`; `g[key].append(v)` | O(1) each |
+| counter that starts at 0 | `d = defaultdict(int)`; `d[k] += 1` | O(1) |
+| queue (BFS) | `q = deque([start])`; `q.append(x)`; `q.popleft()` | O(1) |
+| last K items | `deque(maxlen=k)` | O(1) per append |
+
+`most_common` breaks ties by first appearance, not alphabetically — sort with
+`key=lambda kv: (-kv[1], kv[0])` when the statement says "smallest word".
+
+## heapq — always get the smallest quickly
+
+```python
+import heapq
+h = []
+heapq.heappush(h, 5)           # O(log N)
+heapq.heappush(h, 1)
+smallest = heapq.heappop(h)    # 1, O(log N)
+h[0]                           # peek the smallest, O(1)
+heapq.heapify(a)               # list -> heap in place, O(N)
+heapq.nsmallest(3, a)          # 3 smallest, O(N log k)
+heapq.nlargest(3, a)
+```
+
+It is a **min**-heap. For a max-heap push `-x` and negate when popping.
+Push tuples to order by priority: `heappush(h, (cost, node))`.
+
+Recipe — always merge the two smallest:
+
+```python
+heapq.heapify(a)
+total = 0
+while len(a) > 1:
+    x = heapq.heappop(a) + heapq.heappop(a)
+    total += x
+    heapq.heappush(a, x)
+```
+
+## bisect — binary search in a sorted list
+
+```python
+from bisect import bisect_left, bisect_right, insort
+a = [1, 3, 3, 3, 7]
+bisect_left(a, 3)      # 1  first index with a[i] >= 3
+bisect_right(a, 3)     # 4  first index with a[i] > 3
+bisect_right(a, 3) - bisect_left(a, 3)   # 3 copies of 3
+bisect_left(a, 5)      # 4  how many values are < 5
+insort(a, 4)           # insert keeping it sorted (O(N) for the shift)
+```
+
+| Question on sorted `a` | Code | Cost |
+| --- | --- | --- |
+| how many `< x` | `bisect_left(a, x)` | O(log N) |
+| how many `≤ x` | `bisect_right(a, x)` | O(log N) |
+| how many in `[lo, hi]` | `bisect_right(a, hi) - bisect_left(a, lo)` | O(log N) |
+| is `x` present | `i = bisect_left(a, x); i < len(a) and a[i] == x` | O(log N) |
+
+Binary search on the answer (largest `x` with `ok(x)` true, `ok` monotone):
+
+```python
+lo, hi = 0, 10 ** 9            # ok(lo) is true, everything above hi is false
+while lo < hi:
+    mid = (lo + hi + 1) // 2
+    if ok(mid):
+        lo = mid
+    else:
+        hi = mid - 1
+```
+
+## math
+
+```python
+import math
+math.gcd(12, 18)               # 6      (also math.gcd(a, b, c))
+math.lcm(4, 6)                 # 12
+math.isqrt(10 ** 18)           # exact integer square root
+math.comb(5, 2), math.perm(5, 2)   # 10, 20
+math.factorial(10)             # 3628800
+math.inf                       # infinity for "best so far"
+pow(a, b, MOD)                 # fast modular power, O(log b)
+pow(a, -1, MOD)                # modular inverse (MOD prime, a % MOD != 0)
+```
+
+Primes up to `N` with a sieve, <Complexity time="O(N log log N)" />:
+
+```python
+def sieve(n):
+    is_p = [True] * (n + 1)
+    is_p[0] = is_p[1] = False
+    for i in range(2, math.isqrt(n) + 1):
+        if is_p[i]:
+            is_p[i * i :: i] = [False] * len(range(i * i, n + 1, i))
+    return is_p
+```
+
+## itertools
+
+```python
+from itertools import accumulate, combinations, permutations, product
+list(accumulate([1, 2, 3]))        # [1, 3, 6]  prefix sums
+combinations(a, 2)                 # every pair, O(N^2)
+permutations(a)                    # every order, O(N!) — only for tiny N
+product(range(2), repeat=n)        # every 0/1 choice, 2^n — every subset
+```

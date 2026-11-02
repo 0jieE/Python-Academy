@@ -31,7 +31,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'import sys\n\ninput = sys.stdin.readline\nn = int(input())\n',
-  relatedLessonIds: ['fund-lists', 'fund-functions'],
+  relatedLessonIds: ['algo-sorting', 'fund-lists', 'fund-functions'],
   source: 'Original problem',
 }
 

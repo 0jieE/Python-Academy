@@ -30,7 +30,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'import sys\n\ndata = sys.stdin.buffer.read().split()\n',
-  relatedLessonIds: ['algo-prefix-sums'],
+  relatedLessonIds: ['algo-prefix-sums', 'algo-complexity'],
   source: 'Original problem',
 }
 
