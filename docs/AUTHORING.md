@@ -211,7 +211,10 @@ Rules:
 
 ### `editorial.mdx`
 
-Explain the idea, give a clean reference solution, and state the complexity:
+Explain the idea, give a clean reference solution, and state the complexity.
+**The last ```python block in the editorial is treated as the reference
+solution** — the editorial check runs it against every sample, so keep partial
+snippets above it and the full program last.
 
 ```mdx
 ## Idea
