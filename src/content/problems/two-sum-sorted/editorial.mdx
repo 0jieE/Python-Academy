@@ -1,0 +1,40 @@
+## Idea
+
+Trying every pair is `O(N²)` — far too slow for `N = 2·10^5`. Because the
+prices are **sorted**, we can use two pointers:
+
+- `i` starts at the cheapest snack, `j` at the most expensive.
+- If `a[i] + a[j]` is too **small**, the only way to grow the sum is to move
+  `i` right (every partner of `a[i]` that is still available is at most `a[j]`).
+- If it is too **big**, move `j` left.
+- If it equals `T`, we found a pair.
+
+Each step moves one pointer, and they stop when they meet, so there are at
+most `N` steps. Since `i < j` always holds, we never use the same snack twice.
+
+(A set of already-seen values also works in `O(N)`; see the Dicts and Sets
+lesson. Two pointers needs no extra memory.)
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n, t = int(data[0]), int(data[1])
+    a = list(map(int, data[2:2 + n]))
+    i, j = 0, n - 1
+    while i < j:
+        s = a[i] + a[j]
+        if s == t:
+            print("YES")
+            return
+        if s < t:
+            i += 1
+        else:
+            j -= 1
+    print("NO")
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" /> (the input list; the pointers use O(1)).

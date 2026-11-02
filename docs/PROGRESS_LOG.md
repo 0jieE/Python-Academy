@@ -55,3 +55,10 @@ Gate for every ticket: `npm run check && npm run build`.
 - **Needs coach review (all `draft: false`):**
   - `src/content/fundamentals/input-output.mdx`, `operators.mdx`, `conditionals.mdx`, `loops.mdx`, `strings.mdx`, `lists.mdx`, `functions.mdx`, `dicts-sets.mdx`
   - `src/content/problems/clock-time/`, `letter-grade/`, `sum-of-evens/`, `palindrome-word/`, `second-largest/` (problem.ts + statement.mdx + editorial.mdx)
+
+## T5 — Content: 10 practice problems ✅
+- **Changed:** 5 more problems (on top of the 5 easy ones from T4 → 10 new + the original `sum-of-two`): medium `ranking-board` (sort with a two-part key), `range-sum-queries` (prefix sums), `two-sum-sorted` (two pointers), `most-frequent-word` (counting with a dict); harder `ribbon-cutting` (binary search on the answer, difficulty `hard`, 3 s sample limit). Each has constraints, ≥ 2 samples incl. an edge case, 2–3 hints, an editorial with complexity, and `source`. Lessons now link them (Lists, Functions, Dicts and Sets, Loops, Prefix Sums).
+- **Verified:** **all 11 editorials pass every sample through the real "Run samples" button** (headless Chrome, Pyodide); the TLE path still works (looping solution → "Time limit" on sample 1, sample 2 passes). The 5 new reference solutions were also stress-tested against brute force on 1 500 random small inputs (0 mismatches); `ribbon-cutting` at maximum size runs in 0.29 s in CPython. All problem pages at 360 px: h1, no console errors, no horizontal scroll.
+- **Left undone:** none. Problems only link lessons that exist today; T6 adds algorithm-lesson links.
+- **Check by hand:** are the stories/titles suitable for your students; is `ribbon-cutting` the right "harder" level for your team?
+- **Needs coach review (all published):** `src/content/problems/ranking-board/`, `range-sum-queries/`, `two-sum-sorted/`, `most-frequent-word/`, `ribbon-cutting/` (problem.ts + statement.mdx + editorial.mdx); changed `practiceProblems` in `fundamentals/lists.mdx`, `functions.mdx`, `dicts-sets.mdx`, `loops.mdx`, `algorithms/prefix-sums.mdx`.

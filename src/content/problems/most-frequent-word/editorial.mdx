@@ -1,0 +1,34 @@
+## Idea
+
+Counting with `words.count(w)` for every word is `O(N²)`. A dictionary counts
+everything in one pass:
+
+```python
+count = {}
+for w in words:
+    count[w] = count.get(w, 0) + 1
+```
+
+To choose the winner we want the **largest** count, and among equal counts
+the **smallest** word. Taking the minimum of `(-count, word)` handles both at
+once: a bigger count gives a smaller `-count`, and equal counts fall back to
+comparing the words.
+
+Don't rely on `Counter.most_common(1)` for ties — it returns the word that
+was **seen first**, not the alphabetically first one.
+
+```python
+import sys
+from collections import Counter
+
+def main():
+    data = sys.stdin.read().split()
+    n = int(data[0])
+    count = Counter(data[1:1 + n])
+    best_neg, best_word = min((-c, w) for w, c in count.items())
+    print(best_word, -best_neg)
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" /> on average (dictionary operations are O(1) on average).

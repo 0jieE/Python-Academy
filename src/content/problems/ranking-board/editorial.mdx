@@ -1,0 +1,32 @@
+## Idea
+
+This is a sort with **two keys**: score (descending) and then name
+(ascending). Python compares tuples item by item, so a key that returns
+`(-score, name)` does exactly that:
+
+- `-score` puts bigger scores first (−45 is smaller than −30).
+- When the scores are equal, `name` decides, in normal alphabetical order.
+
+Remember to convert the score to `int`. As strings, `"9"` would rank above
+`"45"`.
+
+With up to `10^5` lines, read with `sys.stdin` and print once with `join`.
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.read().split()
+    n = int(data[0])
+    teams = []
+    for i in range(n):
+        name = data[1 + 2 * i]
+        score = int(data[2 + 2 * i])
+        teams.append((name, score))
+    teams.sort(key=lambda t: (-t[1], t[0]))
+    print("\n".join(f"{name} {score}" for name, score in teams))
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N log N)" space="O(N)" />

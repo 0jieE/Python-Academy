@@ -1,0 +1,40 @@
+## Idea
+
+Summing every range directly costs `O(N)` per query, so `O(N · Q)` overall —
+up to `4·10^10` steps. We need each answer in `O(1)`.
+
+Build a **prefix-sum** array where `prefix[i]` is the sum of the first `i`
+values (`prefix[0] = 0`). The sum from `l` to `r` is everything up to `r`
+minus everything before `l`:
+
+```python
+answer = prefix[r] - prefix[l - 1]
+```
+
+With 1-based days and `prefix[0] = 0`, the indexes line up with no extra
+`+1`/`-1` juggling, and `l = 1` works without a special case.
+
+The input can have `6·10^5` numbers, so read it all at once and collect the
+answers in a list.
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n, q = int(data[0]), int(data[1])
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + int(data[2 + i])
+    out = []
+    pos = 2 + n
+    for _ in range(q):
+        l, r = int(data[pos]), int(data[pos + 1])
+        pos += 2
+        out.append(prefix[r] - prefix[l - 1])
+    print("\n".join(map(str, out)))
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N + Q)" space="O(N)" />

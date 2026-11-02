@@ -1,0 +1,45 @@
+## Idea
+
+For a fixed length `L` we can count pieces directly:
+`pieces(L) = sum(a_i // L)`. Trying every `L` from `max(a)` down to 1 is up to
+`10^9` checks — too slow.
+
+The key observation: `pieces(L)` only **decreases** as `L` grows. So the
+lengths that work form a block `1, 2, …, best`, followed by lengths that fail.
+That is exactly what binary search finds: the **last** `L` that works.
+
+We keep an interval `[lo, hi]` where `lo` always works and everything above
+`hi` fails. Start with `lo = 0` (meaning "nothing works yet"; that is also the
+answer for the impossible case) and `hi = max(a)`:
+
+```python
+def ok(length):
+    return sum(x // length for x in a) >= k
+```
+
+Each step tests the middle and throws away half of the interval:
+about `log2(10^9) ≈ 30` steps, each costing `O(N)`.
+
+Taking `mid = (lo + hi + 1) // 2` (rounding **up**) matters: with
+`lo = mid` in the "works" branch, rounding down could pick `mid = lo` forever.
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n, k = int(data[0]), int(data[1])
+    a = list(map(int, data[2:2 + n]))
+    lo, hi = 0, max(a)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if sum(x // mid for x in a) >= k:
+            lo = mid
+        else:
+            hi = mid - 1
+    print(lo)
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N log max(a))" space="O(N)" /> — about 30 passes over the ribbons.
