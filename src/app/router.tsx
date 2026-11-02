@@ -20,6 +20,8 @@ export const router = createBrowserRouter([
     children: [
       {
         errorElement: <RouteError />,
+        // Shown inside the layout while the first page's chunk loads.
+        hydrateFallbackElement: <p role="status" className="text-muted-foreground">Loading…</p>,
         children: [
           { index: true, lazy: async () => ({ Component: (await import('./routes/HomePage')).default }) },
           { path: 'learn', lazy: async () => ({ Component: (await import('./routes/LearnIndexPage')).default }) },

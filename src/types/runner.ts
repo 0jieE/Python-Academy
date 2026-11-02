@@ -46,7 +46,11 @@ export type FromWorker =
   | { type: 'init-error'; message: string }
   | { type: 'stdout'; runId: string; chunk: string }
   | { type: 'stderr'; runId: string; chunk: string }
-  | { type: 'done'; runId: string; result: RunResult }
+  /**
+   * Output already arrived as stdout/stderr chunks, so `result.stdout/stderr`
+   * are empty here. `fatal`: the interpreter crashed — restart the worker.
+   */
+  | { type: 'done'; runId: string; result: RunResult; fatal?: boolean }
 
 // ---- UI-facing abstraction -------------------------------------------------
 

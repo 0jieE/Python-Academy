@@ -4,7 +4,7 @@ Static, self-paced Python competitive-programming tutorial site.
 React + Vite + TypeScript SPA, deployed to **Render Static Site (free)**.
 No backend, accounts, database, remote execution or cloud judging in MVP.
 
-Status: **Plan + Phase-1 scaffold done (ticket T0).** Next ticket: T1.
+Status: tickets are tracked in `docs/PROGRESS_LOG.md`.
 Versions verified on 2026-11-02 (see `package.json` / `package-lock.json`).
 
 ---
@@ -35,6 +35,24 @@ Versions verified on 2026-11-02 (see `package.json` / `package-lock.json`).
 | R11 | **Brand-new toolchain** (Vite 8, TypeScript 7 native, React Router 8, Tailwind 4, Zod 4). AI coding tools may suggest older APIs. | Wrong code suggestions | Lockfile pins exact versions. `CLAUDE.md` lists versions; check docs before using unfamiliar APIs. |
 | R12 | **localStorage** can be disabled, full, or cleared; progress is per device. | Lost progress | try/catch everywhere, in-memory fallback, visible "saved on this device only" notice, JSON export/import (T11). |
 | R13 | **Problem copyright.** Official contest statements may be copyrighted. | Takedown | Write original problems or "adapted from…" with attribution (`source` field). |
+
+### T9 spike results (2026-11-02)
+
+Pyodide 314.0.7 (Python 3.14.2) loaded in a module Web Worker from jsDelivr with
+`await import(indexURL + 'pyodide.mjs')`, built with `npm run build` and served
+by `npm run preview`. Measured with headless Chrome 156.0.8078.79 via the DevTools
+protocol (throttling applied to the worker target too — page-level throttling
+does **not** reach worker requests). Time = `warmUp()` start → interpreter ready.
+
+| Scenario | Load time | Transferred |
+| --- | --- | --- |
+| Cold cache, this PC's connection (Wi-Fi, unthrottled) | 3.4–3.7 s | 5.6 MB (brotli: wasm 3.1 MB, stdlib zip 2.5 MB, JS 0.2 MB) |
+| Cold cache, DevTools "Fast 4G" (9 Mbps down, 1.5 Mbps up, 165 ms RTT) | 7.7 s | 5.6 MB |
+| Warm (HTTP cache, page reload) | 1.5–1.9 s | 0 MB |
+| Respawn after timeout / Stop (cache) | ≈ 1.4–1.7 s until the next run starts | 0 MB |
+
+`print(1+1)` then runs in ~1 ms. Not yet measured: **Firefox, Safari/iOS, and
+a real low-end phone** (WASM compile on slow CPUs adds seconds) — manual check.
 
 ---
 
