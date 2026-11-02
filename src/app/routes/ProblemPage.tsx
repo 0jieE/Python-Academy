@@ -12,6 +12,9 @@ import { useProgress } from '@/features/progress/useProgress'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import NotFoundPage from './NotFoundPage'
 
+// Focusable so long lines can be scrolled with the keyboard.
+const samplePreClass = 'overflow-x-auto rounded bg-muted p-2 text-sm outline-ring focus-visible:outline-2 focus-visible:outline-offset-2'
+
 export default function ProblemPage() {
   const problem = findProblem(useParams().slug)
   useDocumentTitle(problem?.title ?? 'Page not found')
@@ -61,11 +64,11 @@ export default function ProblemPage() {
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold">{t.name ?? `Sample ${i + 1}`} · input</p>
-                  <pre className="overflow-x-auto rounded bg-muted p-2 text-sm">{t.input}</pre>
+                  <pre tabIndex={0} role="region" aria-label={`${t.name ?? `Sample ${i + 1}`} input`} className={samplePreClass}>{t.input}</pre>
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold">expected output</p>
-                  <pre className="overflow-x-auto rounded bg-muted p-2 text-sm">{t.expectedOutput}</pre>
+                  <pre tabIndex={0} role="region" aria-label={`${t.name ?? `Sample ${i + 1}`} expected output`} className={samplePreClass}>{t.expectedOutput}</pre>
                 </div>
               </div>
               {t.explanation && <p className="text-sm text-muted-foreground">{t.explanation}</p>}

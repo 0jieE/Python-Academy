@@ -6,10 +6,12 @@ import { Callout } from './Callout'
 import { Complexity } from './Complexity'
 import { Answer, Exercise } from './Exercise'
 import { KeyIdea } from './KeyIdea'
+import { MdxLink } from './MdxLink'
 import { RunnableExample } from './RunnableExample'
 
 /** Components available inside every MDX file without importing them. */
 const mdxComponents: MDXComponents = {
+  a: MdxLink,
   Callout,
   KeyIdea,
   Exercise,

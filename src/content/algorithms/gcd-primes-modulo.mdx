@@ -1,0 +1,243 @@
+---
+id: algo-math-gcd-primes-mod
+slug: gcd-primes-modulo
+title: "Math: GCD, Primes and Modulo"
+summary: The number theory every contest uses — GCD and LCM, prime tests, the sieve, and arithmetic modulo M.
+category: algorithms
+level: intermediate
+order: 20
+prerequisites: [algo-complexity, fund-operators]
+learningObjectives:
+  - Compute GCD and LCM with math.gcd and math.lcm and know why Euclid is fast
+  - Test one number for primality in O(sqrt N)
+  - List all primes up to N with the Sieve of Eratosthenes
+  - Keep big answers small with the modulo rules and pow(a, b, m)
+tags: [math, gcd, lcm, primes, sieve, modulo, mod, pow, number-theory, divisors]
+practiceProblems: [simplify-fraction, prime-queries]
+draft: false
+---
+
+## Why this matters
+
+Number theory hides in many contest problems: simplifying ratios, scheduling
+things that repeat every `a` and `b` days, counting primes, or printing a huge
+answer "modulo 10^9 + 7". A handful of tools covers almost all of it, and
+Python's built-in big integers make them easy to use.
+
+<KeyIdea>
+GCD is `O(log N)`, a prime test is `O(sqrt N)`, and the sieve finds **all**
+primes up to `N` in about `O(N log log N)`. When the answer must be printed
+modulo `M`, apply `% M` after every `+` and `*`.
+</KeyIdea>
+
+## GCD and LCM
+
+The **greatest common divisor** `gcd(a, b)` is the largest number dividing both.
+Euclid's rule `gcd(a, b) = gcd(b, a % b)` shrinks the numbers very fast:
+
+```python
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+```
+
+In practice use the library — it works for any number of arguments:
+
+```python
+import math
+math.gcd(84, 36)          # 12
+math.lcm(4, 6)            # 12
+math.gcd(12, 18, 30)      # 6
+```
+
+The **least common multiple** satisfies `lcm(a, b) = a // gcd(a, b) * b`
+(divide first to keep the numbers small). Two buses that come every 4 and 6
+minutes meet every `lcm(4, 6) = 12` minutes.
+
+Cost: <Complexity time="O(log min(a, b))" />.
+
+## Is N prime?
+
+A divisor larger than `sqrt(N)` always pairs with one smaller than `sqrt(N)`,
+so we only need to try divisors up to `sqrt(N)`:
+
+<RunnableExample title="Trial division" stdin="97">
+
+```python
+from math import isqrt
+
+def is_prime(n):
+    if n < 2:
+        return False
+    for d in range(2, isqrt(n) + 1):
+        if n % d == 0:
+            return False
+    return True
+
+print(is_prime(int(input())))
+```
+
+</RunnableExample>
+
+Cost: <Complexity time="O(sqrt N)" /> — fine for one number up to about `10^12`,
+too slow for many numbers. Use `math.isqrt` (exact) rather than `n ** 0.5`.
+
+The same loop finds all divisors in `O(sqrt N)`: when `d` divides `n`, so does
+`n // d`.
+
+## Sieve of Eratosthenes
+
+To know which of `0 … N` are prime, cross out multiples instead of testing each
+number. Start crossing at `i * i` — smaller multiples were already crossed out
+by smaller primes.
+
+```python
+from math import isqrt
+
+def sieve(n):
+    is_prime = bytearray([1]) * (n + 1)   # 1 = "maybe prime"
+    is_prime[0] = 0
+    if n >= 1:
+        is_prime[1] = 0
+    for i in range(2, isqrt(n) + 1):
+        if is_prime[i]:
+            is_prime[i * i :: i] = bytes(len(range(i * i, n + 1, i)))
+    return is_prime
+
+flags = sieve(30)
+print([i for i in range(31) if flags[i]])   # [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+```
+
+The slice assignment crosses out a whole row in one fast step, so a sieve up to
+`10^7` runs in about a second in CPython.
+Cost: <Complexity time="O(N log log N)" space="O(N)" />.
+
+## Arithmetic modulo M
+
+When a statement says "print the answer modulo `10^9 + 7`", the true answer
+is huge. Reduce while you compute — these rules let you:
+
+| Operation | Safe form |
+| --- | --- |
+| addition | `(a + b) % M` |
+| subtraction | `(a - b) % M` — Python's `%` is never negative |
+| multiplication | `(a * b) % M` |
+| power | `pow(a, b, M)` — fast even for `b = 10^18` |
+| division by `b` (M prime) | `a * pow(b, M - 2, M) % M` |
+
+Division is **not** `(a // b) % M`: you multiply by the modular inverse instead.
+Python 3.8+ also has `pow(b, -1, M)`.
+
+<RunnableExample title="Sum of powers of 2, modulo 10^9 + 7" stdin="100000">
+
+```python
+MOD = 10 ** 9 + 7
+n = int(input())
+total = 0
+p = 1
+for _ in range(n):
+    total = (total + p) % MOD
+    p = p * 2 % MOD
+print(total, (pow(2, n, MOD) - 1) % MOD)   # same number, two ways
+```
+
+</RunnableExample>
+
+## Common mistakes
+
+- `n ** 0.5` for big `n` — floating point can be off by one. Use `math.isqrt`.
+- Treating 1 as prime, or forgetting that 2 is.
+- Reducing modulo only at the very end: Python won't overflow, but numbers with
+  millions of digits make every step slow.
+- `(a // b) % M` for modular division — wrong; use the inverse.
+- `lcm` of many numbers without care — it can grow huge; reduce mod `M` only if the problem allows it.
+
+## Competition use
+
+- "Simplify", "same ratio", "tile evenly" → GCD.
+- "When do they meet again" → LCM.
+- "Is it prime?" once → trial division; "primes up to N" or many questions → sieve.
+- "Modulo 10^9 + 7" → `MOD` constant, `% MOD` after each operation, `pow(a, b, MOD)`.
+
+## Exercises
+
+<Exercise title="LCM of a list">
+Read `N` and `N` positive integers. Print the LCM of all of them (it fits in
+Python's integers).
+
+<Answer>
+
+```python
+import math
+n = int(input())
+a = list(map(int, input().split()))
+print(math.lcm(*a))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Count divisors">
+Read `N` (`1 ≤ N ≤ 10^12`) and print how many positive divisors it has.
+
+<Answer>
+
+```python
+from math import isqrt
+n = int(input())
+count = 0
+for d in range(1, isqrt(n) + 1):
+    if n % d == 0:
+        count += 1 if d * d == n else 2
+print(count)
+```
+
+Each divisor `d ≤ sqrt(n)` pairs with `n // d`; a perfect square's root is
+counted once. <Complexity time="O(sqrt N)" />
+
+</Answer>
+</Exercise>
+
+<Exercise title="Factorial modulo">
+Read `N` (`N ≤ 10^6`) and print `N!` modulo `10^9 + 7`.
+
+<Answer>
+
+```python
+MOD = 10 ** 9 + 7
+n = int(input())
+f = 1
+for i in range(2, n + 1):
+    f = f * i % MOD
+print(f)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Twin primes">
+Read `N` (`N ≤ 10^6`). Print how many pairs `(p, p + 2)` with `p + 2 ≤ N` are
+both prime.
+
+<Answer>
+
+```python
+from math import isqrt
+n = int(input())
+is_p = bytearray([1]) * (n + 1)
+is_p[0] = 0
+if n >= 1:
+    is_p[1] = 0
+for i in range(2, isqrt(n) + 1):
+    if is_p[i]:
+        is_p[i * i :: i] = bytes(len(range(i * i, n + 1, i)))
+print(sum(1 for p in range(2, n - 1) if is_p[p] and is_p[p + 2]))
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+[Counting](/learn/algorithms/counting) — frequencies, pairs and combinations.

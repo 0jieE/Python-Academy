@@ -1,0 +1,37 @@
+## Idea
+
+Build each pattern one character at a time with a recursive function
+`build(pattern)`:
+
+- **Base case:** the pattern has `N` characters → it is complete, save it.
+- **Recursive step:** append `0` (always allowed) and recurse; then append `1`
+  only if the last character isn't `1`, and recurse.
+
+Trying `0` before `1` at every position produces the patterns in
+lexicographic order, so no sorting is needed. Invalid branches (`…11`) are
+never explored — this "cut the branch early" idea is called **backtracking**.
+
+The recursion depth is only `N ≤ 15`, far below Python's limit. The number of
+valid patterns grows like the Fibonacci numbers (1 597 for `N = 15`), so the
+output is small.
+
+```python
+def main():
+    n = int(input())
+    out = []
+
+    def build(pattern):
+        if len(pattern) == n:
+            out.append(pattern)
+            return
+        build(pattern + "0")
+        if not pattern.endswith("1"):
+            build(pattern + "1")
+
+    build("")
+    print("\n".join(out))
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N · P)" space="O(N · P)" /> where P is the number of valid patterns (about 1.6^N).

@@ -1,0 +1,28 @@
+## Idea
+
+Pairs only form **inside** a group of equal values, so we don't need to look at
+pairs at all — only at how big each group is.
+
+A group of `c` equal values has `C(c, 2) = c · (c − 1) / 2` pairs: each of the
+`c` values can pair with `c − 1` others, and every pair was counted twice.
+
+Count the groups with `Counter`, then add up the pairs. Python integers don't
+overflow, so the answer (up to about `2·10^10`) is safe.
+
+```python
+import sys
+from collections import Counter
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n = int(data[0])
+    counts = Counter(data[1:1 + n])
+    print(sum(c * (c - 1) // 2 for c in counts.values()))
+
+main()
+```
+
+The values are counted as raw input tokens (`b"7"`), which is fine here
+because equal numbers are written the same way.
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" />

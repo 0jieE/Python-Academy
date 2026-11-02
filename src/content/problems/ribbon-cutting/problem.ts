@@ -37,7 +37,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 3000,
   compareMode: 'tokens-per-line',
   starterCode: 'import sys\n\ndata = sys.stdin.buffer.read().split()\n',
-  relatedLessonIds: ['algo-complexity', 'fund-loops'],
+  relatedLessonIds: ['algo-binary-search', 'algo-complexity'],
   source: 'Original problem (classic "binary search on the answer" pattern)',
 }
 

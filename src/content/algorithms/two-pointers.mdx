@@ -1,0 +1,213 @@
+---
+id: algo-two-pointers
+slug: two-pointers
+title: Two Pointers
+summary: Walk through sorted data with two indexes to replace an O(N²) pair search with one O(N) pass.
+category: algorithms
+level: intermediate
+order: 70
+prerequisites: [algo-sorting]
+learningObjectives:
+  - Find a pair with a given sum using pointers at both ends
+  - Merge two sorted lists in linear time
+  - Remove duplicates and compact a list with a slow and a fast pointer
+  - Explain why each pointer only moves forward
+tags: [two-pointers, pointers, sorted, pair-sum, merge, duplicates, linear]
+practiceProblems: [two-sum-sorted, budget-streak]
+draft: false
+---
+
+## Why this matters
+
+"Is there a pair with sum `T`?", "merge these sorted lists", "how many pairs
+have sum at most `K`?" — checking every pair is `O(N^2)`. When the data is
+sorted, two indexes that only move forward visit each element once.
+
+<KeyIdea>
+Each step, move **one** pointer in the only direction that can still lead to
+an answer. Because pointers never move back, the total work is
+<Complexity time="O(N)" />.
+</KeyIdea>
+
+## Pointers at both ends: pair with sum T
+
+On a sorted list, start `i` at the smallest value and `j` at the largest:
+
+- sum too small → the only way up is `i += 1`;
+- sum too big → the only way down is `j -= 1`;
+- equal → found.
+
+<RunnableExample title="Pair with sum" stdin={"6 13\n1 3 4 6 9 11\n"}>
+
+```python
+n, t = map(int, input().split())
+a = sorted(map(int, input().split()))
+i, j = 0, n - 1
+found = None
+while i < j:
+    s = a[i] + a[j]
+    if s == t:
+        found = (a[i], a[j])
+        break
+    if s < t:
+        i += 1
+    else:
+        j -= 1
+print(found)   # (4, 9)
+```
+
+</RunnableExample>
+
+Why can we drop `a[i]` when the sum is too small? Its best partner, `a[j]`, is
+the largest still available — if even that is too small, no partner works.
+
+## Same direction: merging sorted lists
+
+Two pointers, one per list; always take the smaller front element:
+
+```python
+def merge(a, b):
+    i = j = 0
+    out = []
+    while i < len(a) and j < len(b):
+        if a[i] <= b[j]:
+            out.append(a[i])
+            i += 1
+        else:
+            out.append(b[j])
+            j += 1
+    out.extend(a[i:])
+    out.extend(b[j:])
+    return out
+
+print(merge([1, 4, 9], [2, 3, 10]))   # [1, 2, 3, 4, 9, 10]
+```
+
+Cost: <Complexity time="O(N + M)" />, versus `O((N + M) log(N + M))` for
+`sorted(a + b)`.
+
+## Slow and fast: removing duplicates in place
+
+`fast` reads every element; `slow` marks where the next kept element goes:
+
+```python
+a = [1, 1, 2, 3, 3, 3, 7]
+slow = 0
+for fast in range(len(a)):
+    if fast == 0 or a[fast] != a[fast - 1]:
+        a[slow] = a[fast]
+        slow += 1
+del a[slow:]
+print(a)   # [1, 2, 3, 7]
+```
+
+## Counting pairs with sum at most K
+
+With `i` at the start and `j` at the end of a sorted list: if
+`a[i] + a[j] ≤ K`, then `a[i]` pairs with **every** element from `i + 1` to `j`
+— that's `j - i` pairs at once. Then move `i`. Otherwise move `j`.
+
+```python
+a.sort()
+i, j, pairs = 0, len(a) - 1, 0
+while i < j:
+    if a[i] + a[j] <= k:
+        pairs += j - i
+        i += 1
+    else:
+        j -= 1
+```
+
+## Common mistakes
+
+- Forgetting to sort first — two pointers rely on order.
+- `while i <= j` in pair problems: then an element can pair with itself.
+- Moving both pointers at once, skipping valid pairs.
+- Rebuilding lists with slicing inside the loop — that brings back `O(N^2)`.
+
+## Competition use
+
+- Sorted input + "pair / triple with some sum" → two pointers (triples: fix one,
+  two-pointer the rest, `O(N^2)`).
+- Merging, intersecting or comparing two sorted lists → one pointer each.
+- Contiguous ranges with a condition → the special case called
+  [sliding window](/learn/algorithms/sliding-window).
+
+## Exercises
+
+<Exercise title="Common elements">
+Read two sorted lists (each on its own line, first a count). Print the values
+that appear in both, in increasing order, each once.
+
+<Answer>
+
+```python
+n = int(input()); a = list(map(int, input().split()))
+m = int(input()); b = list(map(int, input().split()))
+i = j = 0
+out = []
+while i < n and j < m:
+    if a[i] < b[j]:
+        i += 1
+    elif a[i] > b[j]:
+        j += 1
+    else:
+        if not out or out[-1] != a[i]:
+            out.append(a[i])
+        i += 1
+        j += 1
+print(*out)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Pairs with sum at most K">
+Read `N` and `K`, then `N` integers. Print how many pairs `i < j` have
+`a_i + a_j ≤ K`.
+
+<Answer>
+
+```python
+n, k = map(int, input().split())
+a = sorted(map(int, input().split()))
+i, j, pairs = 0, n - 1, 0
+while i < j:
+    if a[i] + a[j] <= k:
+        pairs += j - i
+        i += 1
+    else:
+        j -= 1
+print(pairs)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Boats">
+Each boat carries at most 2 people and at most `W` kilograms. Read `N` and `W`
+and the `N` weights (each ≤ `W`). Print the minimum number of boats.
+
+<Answer>
+
+Pair the heaviest person with the lightest if they fit; otherwise the heaviest
+goes alone.
+
+```python
+n, w = map(int, input().split())
+a = sorted(map(int, input().split()))
+i, j, boats = 0, n - 1, 0
+while i <= j:
+    if i < j and a[i] + a[j] <= w:
+        i += 1
+    j -= 1
+    boats += 1
+print(boats)
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+[Sliding window](/learn/algorithms/sliding-window) — two pointers over contiguous ranges.

@@ -10,7 +10,7 @@ export default function HomePage() {
   useDocumentTitle()
   const { progress } = useProgress()
   const last = progress.lastVisitedLesson && findLessonById(progress.lastVisitedLesson.id)
-  const firstLesson = roadmap.flatMap((s) => s.lessonIds).map(findLessonById).find(Boolean)
+  const firstLesson = roadmap.flatMap((s) => s.items).map((item) => findLessonById(item.id)).find(Boolean)
   const resume = last || firstLesson
   return (
     <div className="space-y-10">
@@ -45,18 +45,18 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
             <ol className="grid gap-2 sm:grid-cols-2">
-              {stage.lessonIds.map((id, i) => {
-                const lesson = findLessonById(id)
+              {stage.items.map((item, i) => {
+                const lesson = findLessonById(item.id)
                 return (
-                  <li key={id} className="flex items-center gap-2 text-sm">
+                  <li key={item.id} className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">{i + 1}.</span>
                     {lesson ? (
                       <>
                         <Link className="underline-offset-4 hover:underline" to={lesson.url}>{lesson.title}</Link>
-                        <DoneMark done={progress.completedLessonIds.includes(id)} />
+                        <DoneMark done={progress.completedLessonIds.includes(item.id)} />
                       </>
                     ) : (
-                      <span className="text-muted-foreground">{id} · coming soon</span>
+                      <span className="text-muted-foreground">{item.title} · coming soon</span>
                     )}
                   </li>
                 )

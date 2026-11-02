@@ -1,0 +1,29 @@
+## Idea
+
+Sort the scores once. In a sorted list, all scores `≥ t` sit together at the
+end, so we only need to find **where** that block starts.
+
+`bisect_left(scores, t)` returns the first index whose score is `≥ t` — which
+is also the number of scores `< t`. The answer is `N - bisect_left(scores, t)`.
+Each lookup is a binary search: `O(log N)`.
+
+Using `bisect_right` here would be a bug: it skips scores **equal** to `t`,
+and the second sample checks exactly that.
+
+```python
+import sys
+from bisect import bisect_left
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n, q = int(data[0]), int(data[1])
+    scores = sorted(map(int, data[2:2 + n]))
+    out = []
+    for t in data[2 + n:2 + n + q]:
+        out.append(n - bisect_left(scores, int(t)))
+    print("\n".join(map(str, out)))
+
+main()
+```
+
+**Complexity:** <Complexity time="O((N + Q) log N)" space="O(N)" />

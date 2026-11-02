@@ -32,7 +32,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'import sys\n\ndata = sys.stdin.buffer.read().split()\n',
-  relatedLessonIds: ['algo-sorting', 'algo-complexity', 'fund-dicts-sets'],
+  relatedLessonIds: ['algo-two-pointers', 'algo-sorting', 'fund-dicts-sets'],
   source: 'Original problem',
 }
 

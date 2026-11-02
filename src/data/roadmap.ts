@@ -1,15 +1,23 @@
 /**
  * Recommended learning order shown on the home page.
- * Lesson IDs that don't exist yet are shown as "coming soon" — this lets the
- * coach publish the full roadmap before every lesson is written.
+ * Items whose lesson doesn't exist yet are shown as "<title> · coming soon" —
+ * this lets the coach publish the full roadmap before every lesson is written.
+ * Once the lesson exists, the page shows the lesson's own title instead.
  */
+export interface RoadmapItem {
+  /** Lesson ID (frontmatter `id`). */
+  id: string
+  /** Display title, used while the lesson is still "coming soon". */
+  title: string
+}
+
 export interface RoadmapStage {
   id: string
   title: string
   description: string
   level: 'beginner' | 'intermediate' | 'advanced'
-  /** Ordered lesson IDs (frontmatter `id`). */
-  lessonIds: string[]
+  /** Lessons in learning order. */
+  items: RoadmapItem[]
 }
 
 export const roadmap: RoadmapStage[] = [
@@ -18,15 +26,15 @@ export const roadmap: RoadmapStage[] = [
     title: 'Stage 1 · Python fundamentals',
     description: 'Read input, compute, print exactly what the judge expects.',
     level: 'beginner',
-    lessonIds: [
-      'fund-input-output',
-      'fund-operators',
-      'fund-conditionals',
-      'fund-loops',
-      'fund-strings',
-      'fund-lists',
-      'fund-functions',
-      'fund-dicts-sets',
+    items: [
+      { id: 'fund-input-output', title: 'Input and Output' },
+      { id: 'fund-operators', title: 'Operators and Expressions' },
+      { id: 'fund-conditionals', title: 'Conditionals' },
+      { id: 'fund-loops', title: 'Loops' },
+      { id: 'fund-strings', title: 'Strings' },
+      { id: 'fund-lists', title: 'Lists' },
+      { id: 'fund-functions', title: 'Functions' },
+      { id: 'fund-dicts-sets', title: 'Dicts and Sets' },
     ],
   },
   {
@@ -34,17 +42,17 @@ export const roadmap: RoadmapStage[] = [
     title: 'Stage 2 · Core contest techniques',
     description: 'Math, counting, sorting and the classic O(N) / O(N log N) patterns.',
     level: 'intermediate',
-    lessonIds: [
-      'algo-complexity',
-      'algo-math-gcd-primes-mod',
-      'algo-counting',
-      'algo-sorting',
-      'algo-binary-search',
-      'algo-prefix-sums',
-      'algo-two-pointers',
-      'algo-sliding-window',
-      'algo-greedy',
-      'algo-recursion',
+    items: [
+      { id: 'algo-complexity', title: 'Time Complexity' },
+      { id: 'algo-math-gcd-primes-mod', title: 'Math: GCD, Primes and Modulo' },
+      { id: 'algo-counting', title: 'Counting' },
+      { id: 'algo-sorting', title: 'Sorting' },
+      { id: 'algo-binary-search', title: 'Binary Search' },
+      { id: 'algo-prefix-sums', title: 'Prefix Sums' },
+      { id: 'algo-two-pointers', title: 'Two Pointers' },
+      { id: 'algo-sliding-window', title: 'Sliding Window' },
+      { id: 'algo-greedy', title: 'Greedy' },
+      { id: 'algo-recursion', title: 'Recursion' },
     ],
   },
   {
@@ -52,6 +60,6 @@ export const roadmap: RoadmapStage[] = [
     title: 'Stage 3 · Next level (after V1)',
     description: 'Graphs and dynamic programming.',
     level: 'advanced',
-    lessonIds: ['algo-bfs-dfs', 'algo-dp-intro'],
+    items: [{ id: 'algo-bfs-dfs', title: 'BFS and DFS' }, { id: 'algo-dp-intro', title: 'Dynamic Programming' }],
   },
 ]

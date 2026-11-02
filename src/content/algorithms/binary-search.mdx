@@ -1,0 +1,210 @@
+---
+id: algo-binary-search
+slug: binary-search
+title: Binary Search
+summary: Find positions in sorted data with bisect, and binary search on the answer when "bigger is easier".
+category: algorithms
+level: intermediate
+order: 50
+prerequisites: [algo-sorting]
+learningObjectives:
+  - Use bisect_left and bisect_right and know exactly what they return
+  - Count values in a range of a sorted list in O(log N)
+  - Write a binary search for the first value where a condition becomes true
+  - Recognise "binary search on the answer" problems
+tags: [binary-search, bisect, bisect_left, bisect_right, sorted, search, answer, monotonic]
+practiceProblems: [score-lookup, ribbon-cutting]
+draft: false
+---
+
+## Why this matters
+
+Looking through `N = 2·10^5` values for each of `Q = 2·10^5` questions is
+`4·10^10` steps. On **sorted** data, binary search answers each question in
+about 18 steps. And the same halving idea solves a whole family of "find the
+largest / smallest value that works" problems.
+
+<KeyIdea>
+Binary search needs a **monotonic** yes/no question: once the answer turns
+from "no" to "yes", it stays "yes". Each step throws away half of what's left:
+<Complexity time="O(log N)" />.
+</KeyIdea>
+
+## bisect on a sorted list
+
+```python
+from bisect import bisect_left, bisect_right
+a = [10, 20, 20, 20, 30]
+bisect_left(a, 20)    # 1  first index with a[i] >= 20
+bisect_right(a, 20)   # 4  first index with a[i] > 20
+bisect_left(a, 25)    # 4  where 25 would be inserted
+```
+
+Read them as counts:
+
+| Question (a sorted) | Answer |
+| --- | --- |
+| how many values `< x` | `bisect_left(a, x)` |
+| how many values `≤ x` | `bisect_right(a, x)` |
+| how many values `≥ x` | `len(a) - bisect_left(a, x)` |
+| how many in `[lo, hi]` | `bisect_right(a, hi) - bisect_left(a, lo)` |
+| is `x` present | `i = bisect_left(a, x)` then `i < len(a) and a[i] == x` |
+
+<RunnableExample title="Count values in a range" stdin={"8\n5 1 9 3 7 3 8 2\n3 7\n"}>
+
+```python
+from bisect import bisect_left, bisect_right
+n = int(input())
+a = sorted(map(int, input().split()))
+lo, hi = map(int, input().split())
+print(bisect_right(a, hi) - bisect_left(a, lo))   # 3, 3, 5, 7 -> 4
+```
+
+</RunnableExample>
+
+Sort once (`O(N log N)`), then every question costs `O(log N)`.
+
+## Writing your own: first index where a condition holds
+
+`bisect` only searches lists. For anything else, write the loop. This template
+finds the **first** `x` in `[lo, hi]` where `ok(x)` is true, assuming `ok` is
+false … false, true … true:
+
+```python
+def first_true(lo, hi, ok):
+    # answer is in [lo, hi]; hi must be a value where ok is true
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if ok(mid):
+            hi = mid          # mid works: the answer is mid or earlier
+        else:
+            lo = mid + 1      # mid fails: the answer is after mid
+    return lo
+```
+
+Example: the smallest `x` with `x * x ≥ 2·10^18`:
+
+```python
+print(first_true(0, 2 * 10 ** 9, lambda x: x * x >= 2 * 10 ** 18))
+```
+
+## Binary search on the answer
+
+Many optimisation problems have this shape: "find the **largest** length /
+speed / limit such that something is still possible". If checking one
+candidate `x` is easy, and "possible for `x`" implies "possible for every
+smaller `x`", binary search over `x`:
+
+```python
+def last_true(lo, hi, ok):
+    # ok(lo) is true; finds the largest x in [lo, hi] with ok(x)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2   # round UP, or lo = mid loops forever
+        if ok(mid):
+            lo = mid
+        else:
+            hi = mid - 1
+    return lo
+```
+
+The total cost is `O(log(range) · cost of ok)` — for a range of `10^9`, about
+30 checks. [Ribbon Cutting](/problems/ribbon-cutting) is a full example.
+
+## Common mistakes
+
+- Binary searching an **unsorted** list — sort first.
+- Mixing up `bisect_left` and `bisect_right` on duplicates. Test with a value
+  that appears several times.
+- Infinite loops: with `lo = mid`, the middle must round **up**.
+- A condition that isn't monotonic — binary search silently gives a wrong answer.
+- Searching on floats with `while hi - lo > eps` — prefer a fixed number of
+  iterations (e.g. 100).
+
+## Competition use
+
+- Many "how many ≤ x" questions → sort + `bisect`.
+- "Maximise the minimum" / "minimise the maximum" / "largest possible …" →
+  try binary search on the answer.
+- Write `ok(x)` as its own function and test it on the sample before searching.
+
+## Exercises
+
+<Exercise title="Is it there?">
+Read `N` sorted integers, then `Q` queries. For each query print `YES` if the
+value appears in the list, otherwise `NO`.
+
+<Answer>
+
+```python
+from bisect import bisect_left
+n = int(input())
+a = list(map(int, input().split()))
+q = int(input())
+for _ in range(q):
+    x = int(input())
+    i = bisect_left(a, x)
+    print("YES" if i < n and a[i] == x else "NO")
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Integer square root">
+Read `N` (`0 ≤ N ≤ 10^18`) and print the largest `x` with `x · x ≤ N`, using
+binary search (no floats, no `math.isqrt`).
+
+<Answer>
+
+```python
+n = int(input())
+lo, hi = 0, 10 ** 9 + 1
+while lo < hi:
+    mid = (lo + hi + 1) // 2
+    if mid * mid <= n:
+        lo = mid
+    else:
+        hi = mid - 1
+print(lo)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Reading speed">
+A book has `N` chapters with `p_i` pages. You must finish it in `D` days,
+reading chapters in order and never splitting a chapter across days. Print the
+smallest number of pages per day that is enough.
+
+<Answer>
+
+```python
+n, d = map(int, input().split())
+p = list(map(int, input().split()))
+
+def days_needed(limit):
+    days, today = 1, 0
+    for x in p:
+        if today + x > limit:
+            days += 1
+            today = 0
+        today += x
+    return days
+
+lo, hi = max(p), sum(p)          # hi always works
+while lo < hi:
+    mid = (lo + hi) // 2
+    if days_needed(mid) <= d:
+        hi = mid
+    else:
+        lo = mid + 1
+print(lo)
+```
+
+A bigger limit never needs more days, so "enough" is monotonic.
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+[Prefix sums](/learn/algorithms/prefix-sums) — answer range questions in O(1).

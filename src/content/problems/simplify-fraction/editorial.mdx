@@ -1,0 +1,19 @@
+## Idea
+
+A fraction is in lowest terms when the numerator and denominator have no
+common factor. Dividing both by their **greatest common divisor** removes every
+common factor at once.
+
+`math.gcd` uses Euclid's algorithm, which needs only `O(log min(A, B))` steps
+even for numbers near `10^18`. Use `//` (not `/`) so the result stays an exact
+integer — `/` would turn big numbers into rounded floats.
+
+```python
+import math
+
+a, b = map(int, input().split())
+g = math.gcd(a, b)
+print(f"{a // g}/{b // g}")
+```
+
+**Complexity:** <Complexity time="O(log min(A, B))" space="O(1)" />

@@ -62,8 +62,13 @@ draft: false                         # optional: true hides the page from the si
 | `practiceProblems` | no | list of existing problem slugs |
 | `draft` | no | `true` hides it everywhere |
 
-To put a lesson on the home roadmap, add its `id` to `src/data/roadmap.ts`.
-IDs listed there that don't exist yet show as "coming soon".
+To put a lesson on the home roadmap, add `{ id: '<lesson id>', title: '<title>' }`
+to a stage in `src/data/roadmap.ts`. Items whose lesson doesn't exist yet show
+as "<title> · coming soon".
+
+Link to other pages with normal Markdown links and a site path, e.g.
+`[Binary Search](/learn/algorithms/binary-search)` — they navigate without a
+page reload.
 
 ### Lesson template (sections, in this order)
 
@@ -235,5 +240,5 @@ snippets above it and the full program last.
 - [ ] Page looks right in `npm run dev` (light and dark theme, narrow window)
 - [ ] Problem: editorial passes all samples with "Run samples"
       (or automatically: `npm run build && npm run test:e2e -- --grep @slow`)
-- [ ] New lesson ID added to `src/data/roadmap.ts` (if it belongs on the roadmap)
+- [ ] New lesson added to `src/data/roadmap.ts` (if it belongs on the roadmap)
 - [ ] `npm run check && npm run build` pass

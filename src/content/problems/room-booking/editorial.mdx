@@ -1,0 +1,39 @@
+## Idea
+
+This is the classic **interval scheduling** problem, and the greedy rule is:
+**always accept the booking that ends earliest** among those that still fit.
+
+Why it works (the exchange argument): take any best solution and look at its
+first booking. Replacing it with the booking that ends earliest overall can't
+cause an overlap — that booking ends no later, so everything after it still
+fits. So some best solution starts with the earliest-ending booking, and the
+same reasoning repeats for the rest.
+
+Other natural rules fail:
+
+- *Shortest first*: `0–5, 6–10, 4–7` picks `4–7` and blocks both others.
+- *Earliest start first*: `0–100, 1–2, 3–4` picks `0–100` and nothing else.
+
+Implementation: sort by end time and keep the end of the last accepted booking.
+Use `>=` so a booking starting exactly at that time is accepted.
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n = int(data[0])
+    bookings = [(int(data[2 + 2 * i]), int(data[1 + 2 * i])) for i in range(n)]  # (end, start)
+    bookings.sort()
+    count = 0
+    last_end = -1
+    for end, start in bookings:
+        if start >= last_end:
+            count += 1
+            last_end = end
+    print(count)
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N log N)" space="O(N)" /> — the sort dominates.

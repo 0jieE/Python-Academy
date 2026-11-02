@@ -76,3 +76,26 @@ Filter by difficulty and tag (URL query params), solved-sample/attempted badges,
 
 ## T13 — Deploy to Render
 Follow `docs/PLAN.md` §7 exactly; run the production smoke test checklist; record the URL and Node version in `README.md`.
+
+---
+
+## T14 — Content: finish Stage 2 roadmap (7 algorithm lessons)
+- **Scope:** write the missing Stage 2 lessons, each following the template sections (objectives → explanation → examples → common mistakes → competition use → exercises → next topic), with a `<Complexity>` badge, ≥ 3 exercises, and ≥ 1 linked practice problem:
+  1. `algo-math-gcd-primes-mod` — GCD/LCM (`math.gcd`, `math.lcm`), primality by trial division, Sieve of Eratosthenes, modulo rules, `pow(a, b, m)`
+  2. `algo-counting` — frequency counting with `dict`/`Counter`, counting pairs, combinations (`math.comb`)
+  3. `algo-binary-search` — on a sorted list (`bisect_left/right`) and binary search on the answer
+  4. `algo-two-pointers` — pair sum in a sorted list, merging, removing duplicates
+  5. `algo-sliding-window` — fixed-size and variable-size windows
+  6. `algo-greedy` — when greedy works, the exchange argument, classic interval/coin cases
+  7. `algo-recursion` — base case, call stack, `sys.setrecursionlimit`, recursion vs. loop, intro to memoization (`functools.cache`)
+- **Problems:** add ≥ 1 new problem for each lesson that has none (at least: gcd/primes, binary search, sliding window, greedy, recursion), with ≥ 2 samples including an edge case, hints, and an editorial with complexity.
+- **Roadmap UI fix:** "coming soon" rows currently show the raw ID (e.g. `algo-greedy · coming soon`). Give each roadmap item a display title (`{ id, title }` in `src/data/roadmap.ts`) so unfinished items read "Greedy · coming soon".
+- **Files:** `src/content/algorithms/*.mdx`, `src/content/problems/<slug>/*`, `src/data/roadmap.ts`, `src/app/routes/HomePage.tsx`, cross-links in existing lessons' "Next topic".
+- **Done when:** roadmap Stage 2 shows no "coming soon"; `npm run content:check` passes; every new editorial passes its samples (`npm run test:e2e` runner spec); all new files listed under "needs coach review" in `docs/PROGRESS_LOG.md`.
+- **Test:** `npm run check && npm run build && npm run test:e2e`
+
+## T15 — Content: Stage 3 (graphs + DP intro)
+- **Scope:** `algo-bfs-dfs` (grid and adjacency-list BFS with `collections.deque`, iterative DFS, connected components, shortest path on unweighted graphs) and `algo-dp-intro` (states and transitions, top-down with `functools.cache` vs bottom-up tables, classic: climbing stairs, coin change, LCS or 0/1 knapsack). 2 problems each. Rename stage title from "Next level (after V1)" to "Next level".
+- **Files:** same as T14.
+- **Done when:** roadmap shows no "coming soon" anywhere; same checks as T14.
+- **Test:** `npm run check && npm run build && npm run test:e2e`

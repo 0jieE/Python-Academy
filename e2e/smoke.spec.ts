@@ -61,7 +61,16 @@ test('lesson pages never download Pyodide or Monaco', async ({ page }) => {
 
 test('problem filters live in the URL', async ({ page }) => {
   await page.goto('/problems?difficulty=medium&tag=sorting')
-  await expect(page.getByText(/^Showing 2 of \d+ problems$/)).toBeVisible()
+  const summary = page.getByText(/^Showing \d+ of \d+ problems$/)
+  await expect(summary).toBeVisible()
+  const rows = page.getByRole('main').getByRole('listitem')
+  const count = await rows.count()
+  expect(count).toBeGreaterThan(0)
+  await expect(summary).toHaveText(new RegExp(`^Showing ${count} of `))
+  for (const row of await rows.all()) {
+    await expect(row).toContainText('Medium')
+    await expect(row).toContainText('sorting')
+  }
   await page.getByRole('button', { name: 'All', exact: true }).click()
   await expect(page).toHaveURL(/\/problems\?tag=sorting$/)
 })

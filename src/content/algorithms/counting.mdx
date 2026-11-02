@@ -1,0 +1,197 @@
+---
+id: algo-counting
+slug: counting
+title: Counting
+summary: Count frequencies, pairs and combinations without listing every possibility.
+category: algorithms
+level: intermediate
+order: 30
+prerequisites: [algo-complexity, fund-dicts-sets]
+learningObjectives:
+  - Build frequency tables with Counter, dict, or a fixed-size list
+  - Count pairs from group sizes with c · (c − 1) / 2
+  - Count pairs with a given sum in one pass
+  - Use math.comb and complementary counting
+tags: [counting, frequency, counter, pairs, combinations, comb, combinatorics]
+practiceProblems: [equal-pairs, most-frequent-word]
+draft: false
+---
+
+## Why this matters
+
+"How many pairs…", "how many ways…", "which value appears most…" — counting
+questions are everywhere, and the obvious solution (look at every pair or every
+possibility) is usually too slow. The trick is to count **groups** instead of
+listing their members.
+
+<KeyIdea>
+Count first, then do math on the counts. A frequency table turns many
+`O(N^2)` pair questions into `O(N)`.
+</KeyIdea>
+
+## Frequency tables
+
+```python
+from collections import Counter
+
+words = "the cat and the hat and the bat".split()
+freq = Counter(words)
+print(freq["the"], freq["dog"])      # 3 0   (missing keys count as 0)
+print(freq.most_common(2))           # [('the', 3), ('and', 2)]
+```
+
+When the values are small integers or letters, a plain list is faster than a
+dict:
+
+```python
+s = "banana"
+counts = [0] * 26
+for ch in s:
+    counts[ord(ch) - ord("a")] += 1
+print(counts[0], counts[1], counts[13])   # 3 1 2  (a, b, n)
+```
+
+Building a frequency table costs <Complexity time="O(N)" />.
+
+## Pairs from groups
+
+If a value appears `c` times, it forms `c · (c − 1) / 2` pairs of equal
+elements (choose 2 of `c`):
+
+<RunnableExample title="Pairs of equal values" stdin={"6\n1 2 1 3 1 2\n"}>
+
+```python
+from collections import Counter
+n = int(input())
+counts = Counter(input().split())
+print(sum(c * (c - 1) // 2 for c in counts.values()))   # 3 + 1 = 4
+```
+
+</RunnableExample>
+
+## Pairs with a given sum
+
+Walk left to right. For each `x`, every **earlier** value equal to `T − x`
+makes a pair. Keep counts of what you've seen so far:
+
+```python
+from collections import Counter
+
+def pairs_with_sum(a, t):
+    seen = Counter()
+    total = 0
+    for x in a:
+        total += seen[t - x]   # pairs (earlier, x)
+        seen[x] += 1
+    return total
+
+print(pairs_with_sum([1, 5, 3, 3, 1], 4))   # (1,3),(1,3),(3,1),(3,1) -> 4
+```
+
+Counting only earlier elements guarantees `i < j` and never pairs an element
+with itself. Cost: <Complexity time="O(N)" />.
+
+## Combinations
+
+`math.comb(n, k)` is the number of ways to choose `k` items from `n` when order
+doesn't matter; `math.perm(n, k)` when it does.
+
+```python
+import math
+math.comb(5, 2)   # 10 ways to pick 2 of 5 students for a team
+math.perm(5, 2)   # 20 ways to pick a captain and a vice-captain
+```
+
+**Complementary counting:** sometimes it's easier to count what you *don't*
+want. Pairs of *different* values = all pairs − pairs of equal values:
+
+```python
+n = len(a)
+different = n * (n - 1) // 2 - sum(c * (c - 1) // 2 for c in Counter(a).values())
+```
+
+## Common mistakes
+
+- Counting ordered pairs when the problem wants unordered ones (off by a factor of 2).
+- Pairing an element with itself in "sum to T" problems (e.g. `x + x = T`).
+- Looping over every pair "just to count" — check the constraints first.
+- Using a list of size `max(a) + 1` when values go up to `10^9` — use a dict.
+
+## Competition use
+
+- Read the question as "how big is each group?" and look for a formula.
+- Sum-of-pairs questions → counts of earlier values in a dict.
+- "How many ways" with small numbers → `math.comb`; with "modulo M" →
+  factorials modulo `M` (see [Math](/learn/algorithms/gcd-primes-modulo)).
+
+## Exercises
+
+<Exercise title="Anagrams">
+Read two words. Print `YES` if one is a rearrangement of the other, else `NO`.
+
+<Answer>
+
+```python
+from collections import Counter
+a, b = input().strip(), input().strip()
+print("YES" if Counter(a) == Counter(b) else "NO")
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Different pairs">
+Read `N` and `N` integers. Print the number of pairs `i < j` with
+`a_i ≠ a_j`.
+
+<Answer>
+
+```python
+from collections import Counter
+n = int(input())
+a = input().split()
+same = sum(c * (c - 1) // 2 for c in Counter(a).values())
+print(n * (n - 1) // 2 - same)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Pairs with sum T">
+Read `N` and `T`, then `N` integers. Print how many pairs `i < j` have
+`a_i + a_j = T`.
+
+<Answer>
+
+```python
+from collections import Counter
+n, t = map(int, input().split())
+seen = Counter()
+total = 0
+for x in map(int, input().split()):
+    total += seen[t - x]
+    seen[x] += 1
+print(total)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Committees">
+A class has `B` boys and `G` girls. How many ways are there to choose a
+committee of 2 boys and 3 girls? Read `B` and `G`.
+
+<Answer>
+
+```python
+import math
+b, g = map(int, input().split())
+print(math.comb(b, 2) * math.comb(g, 3))
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+[Sorting](/learn/algorithms/sorting) — the most useful `O(N log N)` tool.

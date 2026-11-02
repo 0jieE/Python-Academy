@@ -93,7 +93,7 @@ function OutputBox({ title, text, note, error }: { title: string; text: string; 
       <p className={cn('mb-1 text-xs font-semibold', error ? 'text-destructive' : 'text-muted-foreground')}>
         {title} {note}
       </p>
-      <pre className={cn('max-h-48 overflow-auto rounded border p-2 font-mono text-xs', error ? 'border-destructive/40 bg-destructive/5 text-destructive' : 'bg-muted/40')}>
+      <pre tabIndex={0} role="region" aria-label={title} className={cn('max-h-48 overflow-auto rounded border p-2 font-mono text-xs outline-ring focus-visible:outline-2 focus-visible:outline-offset-2', error ? 'border-destructive/40 bg-destructive/5 text-destructive' : 'bg-muted/40')}>
         {text || ' '}
       </pre>
     </div>

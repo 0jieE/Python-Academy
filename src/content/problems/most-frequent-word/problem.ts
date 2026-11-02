@@ -36,7 +36,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'import sys\n\ndata = sys.stdin.read().split()\n',
-  relatedLessonIds: ['fund-dicts-sets'],
+  relatedLessonIds: ['algo-counting', 'fund-dicts-sets'],
   source: 'Original problem',
 }
 

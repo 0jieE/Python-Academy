@@ -1,0 +1,42 @@
+## Idea
+
+This is a **variable-size sliding window**. Keep a window of days
+`left … right` and its total cost:
+
+1. Move `right` forward one day and add its cost.
+2. While the total is more than `B`, remove `c[left]` and move `left` forward.
+3. Now the window fits the budget; update the best length `right - left + 1`.
+
+Why is this correct? All costs are **positive**, so making a window longer
+never makes it cheaper. When the window `left … right` is too expensive, any
+window that starts at `left` and ends later is too expensive as well, so
+`left` can safely move on.
+
+Each day enters the window once and leaves at most once, so the whole loop is
+`O(N)` even though there is a `while` inside the `for`.
+
+If no day fits, the window becomes empty (`left = right + 1`), its length is 0,
+and the answer stays 0.
+
+```python
+import sys
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n, budget = int(data[0]), int(data[1])
+    cost = list(map(int, data[2:2 + n]))
+    left = 0
+    total = 0
+    best = 0
+    for right in range(n):
+        total += cost[right]
+        while total > budget:
+            total -= cost[left]
+            left += 1
+        best = max(best, right - left + 1)
+    print(best)
+
+main()
+```
+
+**Complexity:** <Complexity time="O(N)" space="O(N)" /> (the input list; the window itself uses O(1)).

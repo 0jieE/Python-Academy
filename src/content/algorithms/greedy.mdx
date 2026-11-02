@@ -1,0 +1,191 @@
+---
+id: algo-greedy
+slug: greedy
+title: Greedy
+summary: Build an answer by always taking the locally best choice — and learn how to check that this is safe.
+category: algorithms
+level: intermediate
+order: 90
+prerequisites: [algo-sorting]
+learningObjectives:
+  - Recognise problems where a greedy choice gives the best answer
+  - Justify a greedy rule with the exchange argument
+  - Solve interval scheduling and coin-change cases where greedy works
+  - Break a wrong greedy rule with a small counterexample
+tags: [greedy, intervals, scheduling, exchange-argument, coins, sorting]
+practiceProblems: [room-booking]
+draft: false
+---
+
+## Why this matters
+
+Greedy solutions are short and fast — usually "sort, then one pass" in
+`O(N log N)`. They are also the most common source of confident wrong answers:
+a rule that "obviously" works often fails on a three-element case. The skill
+is choosing the right rule and checking it.
+
+<KeyIdea>
+A greedy rule is safe when you can show: **some best solution starts with the
+greedy choice**. Before coding, spend two minutes hunting for a counterexample
+on tiny inputs.
+</KeyIdea>
+
+## A first example: fewest items to reach a total
+
+You need at least `T` points and may pick any of `N` tasks with given points.
+Fewest tasks? Take the biggest first:
+
+```python
+n, t = map(int, input().split())
+points = sorted(map(int, input().split()), reverse=True)
+total = count = 0
+for p in points:
+    if total >= t:
+        break
+    total += p
+    count += 1
+print(count if total >= t else -1)
+```
+
+Any solution with `c` tasks has at most the sum of the `c` biggest values, so
+the biggest-first prefix reaches `T` at least as early. Cost:
+<Complexity time="O(N log N)" />.
+
+## The exchange argument
+
+To prove a greedy rule, take any optimal solution that does **not** start with
+the greedy choice, and **swap** the greedy choice in. If the swap never makes
+things worse, an optimal solution starting greedily exists — and repeating the
+argument covers the whole solution.
+
+## Interval scheduling
+
+Pick as many non-overlapping intervals as possible. Rules that sound right but
+fail:
+
+| Rule | Counterexample |
+| --- | --- |
+| shortest first | `0–5, 4–7, 6–10` → picks `4–7`, blocks both others |
+| earliest start first | `0–100, 1–2, 3–4` → picks `0–100` only |
+| **earliest end first** | correct |
+
+<RunnableExample title="Earliest end first" stdin={"5\n1 3\n2 5\n3 6\n6 8\n5 9\n"}>
+
+```python
+n = int(input())
+intervals = [tuple(map(int, input().split())) for _ in range(n)]
+intervals.sort(key=lambda iv: iv[1])     # by end time
+count, last_end = 0, -1
+for start, end in intervals:
+    if start >= last_end:
+        count += 1
+        last_end = end
+print(count)   # 1-3, 3-6, 6-8 -> 3
+```
+
+</RunnableExample>
+
+Exchange argument: the interval that ends first leaves the most room. Swapping
+it in for the first interval of any optimal solution keeps everything valid.
+
+## Coins: when greedy works and when it doesn't
+
+Paying `X` with the fewest coins, greedy takes the largest coin that fits:
+
+```python
+def greedy_coins(x, coins):
+    count = 0
+    for c in sorted(coins, reverse=True):
+        count += x // c
+        x %= c
+    return count
+
+print(greedy_coins(68, [1, 5, 10, 20]))   # 20+20+20+5+1+1+1 -> 7
+```
+
+This is optimal for everyday coin systems like `1, 5, 10, 20`, but **not** in
+general: with coins `1, 3, 4` and `X = 6`, greedy gives `4 + 1 + 1` (3 coins)
+while `3 + 3` uses 2. For arbitrary coins you need dynamic programming.
+
+## Common mistakes
+
+- Coding the first rule that works on the sample. Test a few tiny hand-made cases.
+- Sorting by the wrong key (start vs end, value vs ratio).
+- Using greedy for coin change with arbitrary coins.
+- Off-by-one on touching intervals: read whether `end == start` counts as overlap.
+
+## Competition use
+
+- "Maximum number of …", "minimum number of … to cover …", "schedule" → think greedy + sort.
+- Write a brute force for tiny `N` and compare when you're unsure.
+- If no simple rule survives the counterexample hunt, the problem is probably DP.
+
+## Exercises
+
+<Exercise title="Minimum waiting">
+`N` students queue at one printer; job `i` takes `t_i` minutes. Choose the order
+that minimises the total time everyone waits before their own job starts.
+Print that total.
+
+<Answer>
+
+Shortest job first — swapping any adjacent pair where the longer job is first
+reduces the total.
+
+```python
+n = int(input())
+t = sorted(map(int, input().split()))
+total = elapsed = 0
+for x in t:
+    total += elapsed
+    elapsed += x
+print(total)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Fewest platforms">
+Trains arrive and leave at given times (`N` lines `arrive depart`). A train
+occupies a platform from arrival to departure inclusive. Print the minimum
+number of platforms.
+
+<Answer>
+
+```python
+n = int(input())
+events = []
+for _ in range(n):
+    a, d = map(int, input().split())
+    events.append((a, 0))      # arrival before a departure at the same time
+    events.append((d, 1))
+events.sort()
+cur = best = 0
+for _, kind in events:
+    if kind == 0:
+        cur += 1
+        best = max(best, cur)
+    else:
+        cur -= 1
+print(best)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Break the rule">
+Someone suggests: "for interval scheduling, pick the interval that overlaps the
+**fewest** others first". Is it always correct?
+
+<Answer>
+
+No. Known counterexamples exist (with about 11 intervals); the rule is also
+harder to code. Earliest end first is both simpler and provably correct — prefer
+rules you can prove with an exchange argument.
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+[Recursion](/learn/algorithms/recursion) — solve a problem with smaller copies of itself.

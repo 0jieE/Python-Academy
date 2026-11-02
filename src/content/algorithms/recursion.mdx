@@ -1,0 +1,210 @@
+---
+id: algo-recursion
+slug: recursion
+title: Recursion
+summary: Solve problems by calling a function on smaller inputs, generate all possibilities, and speed up repeats with memoization.
+category: algorithms
+level: intermediate
+order: 100
+prerequisites: [fund-functions, algo-complexity]
+learningObjectives:
+  - Write a recursive function with a correct base case
+  - Follow the call stack and know Python's recursion limit
+  - Generate all subsets or arrangements with backtracking
+  - Cache repeated calls with functools.cache
+tags: [recursion, base-case, call-stack, recursionlimit, backtracking, memoization, cache]
+practiceProblems: [light-patterns]
+draft: false
+---
+
+## Why this matters
+
+Some problems are naturally described in terms of smaller versions of
+themselves: "all patterns of length `N`" = patterns of length `N − 1` plus one
+more choice. Recursion turns that description straight into code. It is also
+the doorway to backtracking, graph search and dynamic programming.
+
+<KeyIdea>
+Every recursive function needs a **base case** that returns without
+recursing, and every call must move **closer** to it.
+</KeyIdea>
+
+## The shape of a recursive function
+
+```python
+def total(nums, i=0):
+    if i == len(nums):          # base case: nothing left
+        return 0
+    return nums[i] + total(nums, i + 1)   # smaller problem
+
+print(total([4, 1, 5]))         # 10
+```
+
+## The call stack
+
+Each call waits for the call it made. Python keeps these waiting calls on the
+**call stack**; `total([4, 1, 5])` is 4 calls deep. Python stops at about 1000
+levels with `RecursionError`. You can raise the limit:
+
+```python
+import sys
+sys.setrecursionlimit(10 ** 6)
+```
+
+Raising the limit lets the program try deeper recursion, but each level still
+uses memory, and very deep recursion can crash the interpreter. If the depth
+can reach `N = 10^5` or more, a **loop** (or your own stack list) is safer.
+
+```python
+def total_loop(nums):           # same result, no recursion depth
+    s = 0
+    for x in nums:
+        s += x
+    return s
+```
+
+## Generating all possibilities (backtracking)
+
+Recursion shines when you must try every combination. Choose, recurse, undo:
+
+<RunnableExample title="All subsets" stdin="1 2 3">
+
+```python
+nums = list(map(int, input().split()))
+chosen = []
+
+def go(i):
+    if i == len(nums):
+        print(chosen)
+        return
+    go(i + 1)                 # skip nums[i]
+    chosen.append(nums[i])    # take nums[i]
+    go(i + 1)
+    chosen.pop()              # undo the choice
+
+go(0)
+```
+
+</RunnableExample>
+
+There are `2^N` subsets, so this is <Complexity time="O(2^N · N)" /> — fine for
+`N ≤ 20`. Stopping a branch as soon as it can't succeed ("pruning") makes
+backtracking much faster in practice.
+
+## Memoization
+
+Naive Fibonacci recomputes the same values again and again — exponential time:
+
+```python
+def fib(n):
+    return n if n < 2 else fib(n - 1) + fib(n - 2)   # fib(35) takes seconds
+```
+
+`functools.cache` remembers each result, so every `fib(k)` is computed once:
+
+```python
+from functools import cache
+
+@cache
+def fib(n):
+    return n if n < 2 else fib(n - 1) + fib(n - 2)
+
+print(fib(200))   # instant
+```
+
+Now it's <Complexity time="O(N)" /> — this idea grows into dynamic programming.
+Arguments must be hashable (numbers, strings, tuples — not lists).
+
+## Common mistakes
+
+- Missing or wrong base case → infinite recursion → `RecursionError`.
+- Forgetting to `return` the recursive result.
+- Forgetting to undo a choice (`pop`) in backtracking.
+- Passing a list to a `@cache` function → `TypeError: unhashable type`.
+- Using recursion where depth can be `10^5` without thinking about the limit.
+
+## Competition use
+
+- "Print all …" / "try every …" with small `N` → backtracking.
+- Recursive definitions with repeated subproblems → `@cache` (then consider a bottom-up loop).
+- Deep recursion (long chains, big trees) → convert to a loop with an explicit stack.
+
+## Exercises
+
+<Exercise title="Power by halving">
+Write `power(a, n)` recursively using `a^n = (a^(n/2))^2` (times `a` when `n`
+is odd). Read `a` and `n` and print `a^n`.
+
+<Answer>
+
+```python
+def power(a, n):
+    if n == 0:
+        return 1
+    half = power(a, n // 2)
+    return half * half * (a if n % 2 else 1)
+
+a, n = map(int, input().split())
+print(power(a, n))
+```
+
+Only about `log2(n)` calls deep.
+
+</Answer>
+</Exercise>
+
+<Exercise title="All permutations">
+Read a word with distinct letters and print all its arrangements, one per line,
+in alphabetical order.
+
+<Answer>
+
+```python
+word = sorted(input().strip())
+used = [False] * len(word)
+current = []
+
+def go():
+    if len(current) == len(word):
+        print("".join(current))
+        return
+    for i, ch in enumerate(word):
+        if not used[i]:
+            used[i] = True
+            current.append(ch)
+            go()
+            current.pop()
+            used[i] = False
+
+go()
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Grid paths">
+How many paths go from the top-left to the bottom-right corner of an `R × C`
+grid, moving only right or down? Read `R` and `C` (≤ 30) and use recursion
+with memoization.
+
+<Answer>
+
+```python
+from functools import cache
+
+@cache
+def paths(r, c):
+    if r == 1 or c == 1:
+        return 1
+    return paths(r - 1, c) + paths(r, c - 1)
+
+r, c = map(int, input().split())
+print(paths(r, c))
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+Stage 3: BFS and DFS — exploring graphs and grids.

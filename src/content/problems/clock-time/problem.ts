@@ -18,7 +18,7 @@ const problem: ProblemDefinition = {
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'm = int(input())\n',
-  relatedLessonIds: ['fund-operators'],
+  relatedLessonIds: ['fund-operators', 'algo-math-gcd-primes-mod'],
   source: 'Original problem',
 }
 

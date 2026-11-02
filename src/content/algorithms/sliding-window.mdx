@@ -1,0 +1,203 @@
+---
+id: algo-sliding-window
+slug: sliding-window
+title: Sliding Window
+summary: Process every contiguous range in O(N) by updating a running result as the window moves.
+category: algorithms
+level: intermediate
+order: 80
+prerequisites: [algo-two-pointers]
+learningObjectives:
+  - Slide a fixed-size window and update its sum in O(1) per step
+  - Grow and shrink a variable-size window to keep it valid
+  - Track window contents with a counter or dict
+  - Know when a window works (the "shrinking keeps it valid" rule)
+tags: [sliding-window, window, subarray, substring, two-pointers, contiguous]
+practiceProblems: [budget-streak]
+draft: false
+---
+
+## Why this matters
+
+"Best `K` consecutive days", "longest stretch under budget", "shortest part of
+the string containing every letter" — these ask about **contiguous** ranges.
+There are about `N^2 / 2` ranges, but a window that slides across the data
+looks at each element only twice: once when it enters, once when it leaves.
+
+<KeyIdea>
+Don't recompute the window from scratch. When it moves, **add** the element
+that enters and **remove** the one that leaves: <Complexity time="O(N)" />.
+</KeyIdea>
+
+## Fixed-size window
+
+The window always holds `K` elements. Slide it one step: add `a[i]`, subtract
+`a[i - K]`.
+
+<RunnableExample title="Best K consecutive days" stdin={"7 3\n4 2 7 1 8 3 2\n"}>
+
+```python
+n, k = map(int, input().split())
+a = list(map(int, input().split()))
+window = sum(a[:k])
+best = window
+for i in range(k, n):
+    window += a[i] - a[i - k]
+    best = max(best, window)
+print(best)   # 7 + 1 + 8 = 16
+```
+
+</RunnableExample>
+
+Recomputing `sum(a[i:i+k])` for every position would be `O(N · K)`.
+
+## Variable-size window
+
+Here the window grows and shrinks. The pattern:
+
+```text
+left = 0
+for right in range(n):
+    add a[right] to the window
+    while the window is not valid:
+        remove a[left] from the window
+        left += 1
+    the window left..right is valid: update the answer
+```
+
+It only works when **shrinking a bad window can make it good** (and growing a
+good one can make it bad) — for example sums of **positive** numbers.
+
+Longest stretch with sum ≤ `B` (all values positive):
+
+```python
+left = total = best = 0
+for right in range(n):
+    total += a[right]
+    while total > b:
+        total -= a[left]
+        left += 1
+    best = max(best, right - left + 1)
+```
+
+The inner `while` looks like nested loops, but `left` only moves forward —
+`N` steps in total — so the whole thing is still `O(N)`.
+
+## Windows over strings
+
+Track what's inside the window with a dict. Longest substring with no repeated
+letter:
+
+<RunnableExample title="Longest substring without repeats" stdin="abcabcbb">
+
+```python
+s = input().strip()
+count = {}
+left = best = 0
+for right, ch in enumerate(s):
+    count[ch] = count.get(ch, 0) + 1
+    while count[ch] > 1:
+        count[s[left]] -= 1
+        left += 1
+    best = max(best, right - left + 1)
+print(best)   # "abc" -> 3
+```
+
+</RunnableExample>
+
+## When it doesn't work
+
+With negative numbers, shrinking a window can make its sum **bigger**, so the
+"while not valid, shrink" rule breaks. For "subarray with sum exactly `K`" and
+negative values, use [prefix sums](/learn/algorithms/prefix-sums) with a
+dict instead.
+
+## Common mistakes
+
+- Using a variable window on data with negative numbers.
+- Off-by-one in the window length: it is `right - left + 1`.
+- Forgetting to remove the leaving element from the dict/counter.
+- Recomputing `sum(...)` or `len(set(...))` of the window each step — `O(N · K)`.
+
+## Competition use
+
+- "K consecutive" → fixed window.
+- "Longest / shortest contiguous … such that …" with positive values or
+  character counts → variable window.
+- If the condition isn't "shrinking fixes it", think prefix sums or binary search instead.
+
+## Exercises
+
+<Exercise title="Average above X">
+Read `N`, `K`, `X`, then `N` integers. Print how many windows of `K`
+consecutive values have an average of at least `X`.
+
+<Answer>
+
+```python
+n, k, x = map(int, input().split())
+a = list(map(int, input().split()))
+window = sum(a[:k])
+count = 1 if window >= x * k else 0
+for i in range(k, n):
+    window += a[i] - a[i - k]
+    if window >= x * k:
+        count += 1
+print(count)
+```
+
+Comparing `window >= x * k` avoids floating point.
+
+</Answer>
+</Exercise>
+
+<Exercise title="Shortest window with sum at least S">
+Read `N` and `S`, then `N` positive integers. Print the length of the shortest
+contiguous part with sum ≥ `S`, or `0` if there is none.
+
+<Answer>
+
+```python
+n, s = map(int, input().split())
+a = list(map(int, input().split()))
+left = total = 0
+best = n + 1
+for right in range(n):
+    total += a[right]
+    while total >= s:
+        best = min(best, right - left + 1)
+        total -= a[left]
+        left += 1
+print(best if best <= n else 0)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="At most two kinds">
+A row of trees is given as a string of letters (each letter is a fruit type).
+Print the longest contiguous stretch that contains at most 2 different letters.
+
+<Answer>
+
+```python
+s = input().strip()
+count = {}
+left = best = 0
+for right, ch in enumerate(s):
+    count[ch] = count.get(ch, 0) + 1
+    while len(count) > 2:
+        count[s[left]] -= 1
+        if count[s[left]] == 0:
+            del count[s[left]]
+        left += 1
+    best = max(best, right - left + 1)
+print(best)
+```
+
+</Answer>
+</Exercise>
+
+## Next topic
+
+[Greedy](/learn/algorithms/greedy) — make the locally best choice, and prove it's safe.
