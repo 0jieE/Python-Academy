@@ -3,9 +3,13 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { LessonSidebar } from '@/components/layout/LessonSidebar'
 import { PrevNext } from '@/components/layout/PrevNext'
 import { MdxContent } from '@/components/mdx/MdxContent'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CATEGORY_TITLES, findLesson, findProblem, lessonsByCategory, manifest } from '@/content/registry'
+import { ProblemStatusBadge } from '@/features/practice/ProblemStatusBadge'
+import { DIFFICULTY_LABELS } from '@/features/practice/problemFilters'
 import { LessonCompleteButton } from '@/features/progress/LessonProgress'
+import { problemStatus } from '@/features/progress/progressOps'
 import { useProgress, useRecordLessonVisit } from '@/features/progress/useProgress'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { neighbours } from '@/lib/neighbours'
@@ -64,13 +68,23 @@ export default function LessonPage() {
               <CardHeader>
                 <CardTitle>Practice</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5">
+              <CardContent className="space-y-2">
+                <ul>
                   {lesson.practiceProblems.map((s) => {
                     const p = findProblem(s)
-                    return p ? <li key={s}><Link className="underline underline-offset-4" to={p.url}>{p.title}</Link></li> : null
+                    if (!p) return null
+                    return (
+                      <li key={s} className="flex min-h-10 flex-wrap items-center gap-2">
+                        <Link className="underline underline-offset-4" to={p.url}>{p.title}</Link>
+                        <Badge variant="secondary">{DIFFICULTY_LABELS[p.difficulty]}</Badge>
+                        <ProblemStatusBadge status={problemStatus(progress, p.id)} />
+                      </li>
+                    )
                   })}
                 </ul>
+                <Link to="/problems" className="inline-flex min-h-10 items-center text-sm text-muted-foreground underline underline-offset-4">
+                  All practice problems →
+                </Link>
               </CardContent>
             </Card>
           </aside>

@@ -1,10 +1,11 @@
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { MdxContent } from '@/components/mdx/MdxContent'
 import { Badge } from '@/components/ui/badge'
-import { findProblem } from '@/content/registry'
+import { findLessonById, findProblem } from '@/content/registry'
 import { PracticeWorkbench } from '@/features/practice/PracticeWorkbench'
 import { Editorial, Hints } from '@/features/practice/ProblemHelp'
+import { DIFFICULTY_LABELS } from '@/features/practice/problemFilters'
 import { DoneMark } from '@/features/progress/LessonProgress'
 import { problemStatus, recordSampleRun } from '@/features/progress/progressOps'
 import { useProgress } from '@/features/progress/useProgress'
@@ -17,6 +18,7 @@ export default function ProblemPage() {
   const { progress, update } = useProgress()
   if (!problem) return <NotFoundPage />
   const status = problemStatus(progress, problem.id)
+  const relatedLessons = (problem.relatedLessonIds ?? []).map(findLessonById).filter((l) => l !== undefined)
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
@@ -24,7 +26,7 @@ export default function ProblemPage() {
         <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Problems', to: '/problems' }, { label: problem.title }]} />
         <header className="space-y-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <Badge variant="secondary">{problem.difficulty}</Badge>
+            <Badge variant="secondary">{DIFFICULTY_LABELS[problem.difficulty]}</Badge>
             {problem.topicTags.map((t) => (
               <Badge key={t} variant="outline">{t}</Badge>
             ))}
@@ -71,6 +73,21 @@ export default function ProblemPage() {
           ))}
         </section>
         <Hints hints={problem.hints} />
+        {relatedLessons.length > 0 && (
+          <section aria-labelledby="related-heading" className="space-y-2">
+            <h2 id="related-heading" className="font-semibold">Related lessons</h2>
+            <ul className="space-y-1">
+              {relatedLessons.map((l) => (
+                <li key={l.id}>
+                  <Link to={l.url} className="inline-flex min-h-10 items-center gap-2 text-sm underline underline-offset-4">
+                    {l.title}
+                    <DoneMark done={progress.completedLessonIds.includes(l.id)} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {problem.editorialPath && <Editorial sourcePath={problem.editorialPath} />}
         {problem.source && <p className="text-xs text-muted-foreground">Source: {problem.source}</p>}
       </article>
