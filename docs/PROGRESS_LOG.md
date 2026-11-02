@@ -13,3 +13,10 @@ Gate for every ticket: `npm run check && npm run build`.
 - **Verified (headless Chrome on `npm run preview`):** all 14 visible links on a lesson page reachable by Tab; Enter on "Next" goes to Prefix Sums and focuses its `<h1>`; titles update; with `LearnIndexPage-*.js` deleted from `dist/assets`, clicking Learn reloads once and then shows "Something went wrong — part of the page could not be downloaded" with the header still working.
 - **Left undone:** none.
 - **Check by hand:** with a screen reader (NVDA/VoiceOver), confirm the new page's heading is announced after clicking a nav link.
+
+## T3 — MDX authoring kit ✅
+- **Changed:** global MDX components `KeyIdea`, `Exercise` + `Answer` (native `<details>`), `Complexity` (badges), `RunnableExample` (wraps a fenced block so Shiki still highlights at build time; "Open in Playground" passes code + stdin in the URL hash via `src/features/playground/urlState.ts` — no Pyodide on lesson pages). `docs/AUTHORING.md` (frontmatter table, lesson template, components, escaping `<` `{`, problem folder layout, validation). Template lesson `input-output.mdx` uses every component. Inline code renders as a chip (typography's literal backticks removed); code blocks get a border.
+- **Bug fixed (from T0):** `.lesson-prose :where(pre)` override was zeroing Shiki's padding and making light-mode code backgrounds transparent — removed.
+- **Verified:** `level: expert` → `content:check` fails with `input-output.mdx: level: Invalid option…`; missing `title` → `title: Invalid input…`. Lesson page made zero pyodide/monaco requests; no horizontal scroll at 360 px.
+- **Left undone:** none.
+- **Check by hand:** read `docs/AUTHORING.md` as the coach — is anything unclear?

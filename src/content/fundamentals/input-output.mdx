@@ -11,13 +11,14 @@ learningObjectives:
   - Read one value, several values on a line, and many lines of input
   - Convert text input to int and float safely
   - Print output in the exact format a judge compares
-tags: [input, print, stdin, io]
+tags: [input, print, stdin, io, split]
 practiceProblems: [sum-of-two]
 ---
 
 <Callout type="note">
 This is the **template lesson**. Every lesson follows the same sections:
 objectives → explanation → examples → common mistakes → competition use → exercises → next topic.
+See `docs/AUTHORING.md`.
 </Callout>
 
 ## Why this matters
@@ -26,6 +27,11 @@ In a contest, your program never talks to a person. A judge feeds it text on
 **standard input (stdin)** and compares what you print on **standard output
 (stdout)** character by character. Most beginner "wrong answers" are really
 input/output mistakes.
+
+<KeyIdea>
+The judge only reads what you print. Print **exactly** the answer in the
+required format — no prompts, no labels, no extra spaces or lines.
+</KeyIdea>
 
 ## Reading input
 
@@ -36,12 +42,17 @@ name = input()          # "Ana"
 n = int(input())        # "5"  -> 5
 ```
 
-Several numbers on one line:
+Several numbers on one line: `split()` cuts the line at spaces, `map(int, ...)`
+converts every piece.
+
+<RunnableExample title="Two numbers on one line" stdin="3 4">
 
 ```python
-a, b = map(int, input().split())        # "3 4" -> 3, 4
-nums = list(map(int, input().split()))  # "1 2 3" -> [1, 2, 3]
+a, b = map(int, input().split())
+print(a + b)
 ```
+
+</RunnableExample>
 
 Many lines, when the first line says how many follow:
 
@@ -51,14 +62,21 @@ for _ in range(n):
     x = int(input())
 ```
 
-For large inputs, `sys.stdin` is much faster:
+For large inputs, `sys.stdin` is much faster. It reads **everything** at once
+and `split()` turns it into a list of words, no matter how the lines are broken.
+Reading all input this way costs <Complexity time="O(input size)" />.
+
+<RunnableExample title="Read all input at once" stdin={"3\n10 20 30\n"}>
 
 ```python
 import sys
 data = sys.stdin.read().split()
 n = int(data[0])
 nums = list(map(int, data[1:1 + n]))
+print(sum(nums))
 ```
+
+</RunnableExample>
 
 ## Printing output
 
@@ -73,6 +91,7 @@ print("\n".join(map(str, nums)))  # one per line, fast
 ## Common mistakes
 
 - Printing extra text like `print("Answer:", x)` — the judge only wants `x`.
+- Writing `input("Enter N: ")` — the prompt is printed to stdout and causes Wrong Answer.
 - Forgetting `int(...)`, so `"3" + "4"` becomes `"34"`.
 - Calling `input()` once when the numbers are on **separate lines**.
 - Wrong number of decimals: read the output spec carefully.
@@ -84,9 +103,45 @@ the parsed values to check them against the sample input before solving.
 
 ## Exercises
 
-1. Read two integers on one line and print their sum.
-2. Read `N`, then `N` integers on the next line, and print the largest.
-3. Read a name and print `Hello, <name>!`.
+<Exercise title="Sum of two">
+Read two integers on one line and print their sum.
+
+<Answer>
+
+```python
+a, b = map(int, input().split())
+print(a + b)
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Largest number">
+Read `N`, then `N` integers on the next line, and print the largest.
+
+<Answer>
+
+```python
+n = int(input())
+nums = list(map(int, input().split()))
+print(max(nums))
+```
+
+</Answer>
+</Exercise>
+
+<Exercise title="Greeting">
+Read a name and print `Hello, <name>!` — for input `Ana` print `Hello, Ana!`.
+
+<Answer>
+
+```python
+name = input()
+print(f"Hello, {name}!")
+```
+
+</Answer>
+</Exercise>
 
 ## Next topic
 

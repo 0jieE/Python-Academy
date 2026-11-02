@@ -3,11 +3,19 @@ import type { MDXComponents } from 'mdx/types'
 import { Suspense, use } from 'react'
 import { loadMdx } from '@/content/registry'
 import { Callout } from './Callout'
+import { Complexity } from './Complexity'
+import { Answer, Exercise } from './Exercise'
+import { KeyIdea } from './KeyIdea'
+import { RunnableExample } from './RunnableExample'
 
 /** Components available inside every MDX file without importing them. */
 const mdxComponents: MDXComponents = {
   Callout,
-  // T9 will add: <RunnableExample code="..." stdin="..." />  (opens the playground lazily)
+  KeyIdea,
+  Exercise,
+  Answer,
+  Complexity,
+  RunnableExample,
 }
 
 // Cache promises so React's `use()` sees the same promise across re-renders.
@@ -34,7 +42,7 @@ function MdxBody({ sourcePath }: { sourcePath: string }) {
   const { default: Content } = use(getModule(sourcePath))
   return (
     <MDXProvider components={mdxComponents}>
-      <div className="lesson-prose prose prose-neutral max-w-none dark:prose-invert">
+      <div className="lesson-prose prose prose-neutral max-w-none dark:prose-invert prose-code:before:content-none prose-code:after:content-none">
         <Content />
       </div>
     </MDXProvider>

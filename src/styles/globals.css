@@ -26,6 +26,7 @@
 }
 .shiki {
   overflow-x: auto;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 1rem;
   font-size: 0.875rem;
@@ -38,11 +39,15 @@ h1[tabindex='-1']:focus {
 }
 
 /* ---- Lesson typography ---------------------------------------------------- */
-.lesson-prose :where(pre) {
-  /* Shiki sets its own background; let typography stop overriding it. */
-  background-color: transparent;
-  padding: 0;
+/* Inline code (not inside a Shiki block): subtle chip instead of backticks. */
+.lesson-prose :where(:not(pre) > code) {
+  border-radius: 0.25rem;
+  background-color: var(--muted);
+  padding: 0.1em 0.35em;
+  font-weight: 500;
 }
+/* Typography's <pre> styles live in a cascade layer, so the unlayered .shiki
+   rules above already win — no override needed here. */
 .lesson-prose :where(table) {
   display: block;
   overflow-x: auto; /* wide tables scroll instead of breaking mobile layout */
