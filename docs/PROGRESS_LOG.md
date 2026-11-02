@@ -175,3 +175,13 @@ Gate for every ticket: `npm run check && npm run build`.
 - **Related lessons:** pill links with the done mark.
 - **Workbench:** Stop and Reset code are icon buttons on phones (accessible names unchanged), so the toolbar fits one row. The Ctrl/⌘ + Enter tip shows only from `md` up.
 - **Verified:** `npm run check` ✔, `npm run build` ✔, `npm run test:e2e`: 227 passed on the full run. The 22 axe failures it found (sample labels too light on grey) were fixed, and the axe suite was re-run (108 passed). Screenshots checked at 360 px in light and dark; no horizontal scroll.
+
+## 2026-11-03: T13, deployed to Render
+
+- **Live:** https://py-academy.onrender.com/ (Static Site from `render.yaml`, free plan, Node 22 from `.node-version`). Recorded in `README.md`.
+- **Deploy config:** `render.yaml` adds `Cache-Control: no-cache` for `sw.js`, `manifest.webmanifest` and `index.html`, and the manifest content type. A clean clone passed `npm ci`, `npm run check` and `npm run build` before the push.
+- **Production smoke test:**
+  - Headers: `sw.js` and the manifest are `no-cache` with the right types; `/assets/*` is immutable; `/pagefind/pagefind.js` is JavaScript; deep links and unknown paths get the app (rewrite works).
+  - `playwright.config.ts` takes `BASE_URL` to test a deployed site. Smoke, runner and PWA specs against production: **141 passed**. That includes every route at 360 px, the tab bar, the interactive input sheet, lesson Run, all 22 editorials passing their samples, no Pyodide or editor on lesson pages before Run, progress surviving a reload, offline pages and offline Python.
+  - Search for "split" returns 8 results, with no console errors.
+- **Left for a person:** test on real Android Chrome and iOS Safari (install, key bar, input sheet above the keyboard). Watch Render's bandwidth use on the free plan.

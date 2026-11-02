@@ -4,6 +4,10 @@ Self-paced Python lessons, cheat sheets and practice problems for students
 preparing for programming competitions. Static site: React + Vite + TypeScript,
 deployed on Render. Python runs in the browser with Pyodide.
 
+**Live:** https://py-academy.onrender.com/ (Render Static Site, free plan; built
+with Node 22 from `.node-version`, settings in `render.yaml`). Installable as an
+app on phones and works offline after the first visit.
+
 ## Quick start
 
 ```bash
@@ -14,10 +18,12 @@ npm run dev     # http://localhost:5173
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Rebuild content manifest, start dev server |
-| `npm run build` | Validate content → typecheck → build `dist/` → search index |
+| `npm run build` | Validate content → typecheck → build `dist/` → search index → service worker |
 | `npm run preview` | Serve `dist/` locally (use this to test search and the Python runner) |
 | `npm run check` | Typecheck + lint + unit tests |
 | `npm run content:check` | Validate lesson frontmatter and problem files only |
+| `npm run test:e2e` | Playwright tests against `npm run preview` (after a build) |
+| `BASE_URL=https://py-academy.onrender.com npx playwright test e2e/smoke.spec.ts e2e/runner.spec.ts e2e/pwa.spec.ts` | Same tests against the live site |
 
 ## Adding content
 
