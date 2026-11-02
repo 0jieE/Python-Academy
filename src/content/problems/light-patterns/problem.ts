@@ -15,7 +15,7 @@ const problem: ProblemDefinition = {
   ],
   hints: [
     'Build the pattern one light at a time with a recursive function.',
-    'Try 0 before 1 at every position — then the patterns come out in order automatically.',
+    'Try 0 before 1 at every position. Then the patterns come out in order automatically.',
     'You may put a 1 only if the previous light is not 1.',
   ],
   timeLimitMs: 2000,

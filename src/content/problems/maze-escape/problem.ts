@@ -27,7 +27,7 @@ const problem: ProblemDefinition = {
   hints: [
     'Every move costs the same, so breadth-first search (BFS) finds the shortest path.',
     'Use collections.deque as the queue and a distance grid filled with -1 for "not visited".',
-    'Mark a cell visited when you put it in the queue, not when you take it out — otherwise cells are added many times.',
+    'Mark a cell visited when you put it in the queue, not when you take it out. Otherwise cells are added many times.',
   ],
   timeLimitMs: 3000,
   compareMode: 'tokens-per-line',

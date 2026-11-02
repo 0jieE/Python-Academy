@@ -103,3 +103,75 @@ Gate for every ticket: `npm run check && npm run build`.
   - Lessons: `src/content/algorithms/bfs-dfs.mdx`, `dp-intro.mdx`
   - Problems (problem.ts + statement.mdx + editorial.mdx): `src/content/problems/maze-escape/`, `friend-groups/`, `stair-climb/`, `exact-change/`
   - Small edits: "Next topic" line in `algorithms/recursion.mdx`; stage title in `src/data/roadmap.ts`
+
+## Mobile app, PWA, pocket IDE and interactive input ✅ (not a TASKS.md ticket — user request, 2026-11-03)
+- **Changed:**
+  - **Phone app shell:** a bottom tab bar (Home · Learn · Practice · IDE · Progress) replaces the hamburger menu. Nested pages get a back button (route `handle.back`). The footer is hidden on phones. Added safe-area insets, `100dvh`, `interactive-widget=resizes-content` (the keyboard shrinks the layout), view transitions on tab changes (off with reduced motion), and the tab bar hides while typing. Cheat sheets are reachable from the Learn page.
+  - **Installable PWA:** `public/manifest.webmanifest` with shortcuts, icons in `public/icons/` (192, 512, maskable, apple-touch; new favicon), theme-color that follows the in-app theme, and iOS meta tags. `scripts/build-sw.ts` (new last build step) writes `dist/sw.js` from `scripts/sw.template.js`:
+    - precaches every built file (178 files, 3.0 MB) with an SPA navigation fallback;
+    - caches the pinned Pyodide CDN folder at runtime, never in `dist/`;
+    - new versions wait for the "A new version is ready · Reload" pill.
+    The header gets an install button (`beforeinstallprompt`), Home gets an install card (with Share → Add to Home Screen steps on iOS), and an offline strip appears when the connection drops.
+  - **Pocket IDE (`/playground`, now titled "IDE"):**
+    - full-screen on phones: toolbar, CodeMirror editor, a symbol key bar with Run at thumb reach, and a collapsible console;
+    - side by side on desktop;
+    - the stdin textarea and description text are gone;
+    - code is kept in localStorage (it was sessionStorage).
+  - **Editor:** **CodeMirror 6** replaces Monaco on every screen size: highlighting in the same GitHub colours as lessons, auto-indent, bracket closing, completion, Ctrl/⌘+Enter. It is bundled so it works offline (lazy chunk, ≈137 KB gzip). `@monaco-editor/react` was removed.
+  - **Interactive input:** when a program calls `input()` past the typed input, a pop-up sheet asks for it: a bottom sheet on phones, a dialog on desktop. It shows the prompt, offers example or sample input as one-tap fills, End input (EOF, Ctrl+D) and Stop, and stays open between lines so the keyboard doesn't bounce. Typed input is echoed in highlighter yellow in the console.
+    - This works by **replay** (no SharedArrayBuffer/COOP/COEP): the worker serves stdin a line at a time and echoes each line in order with the output. Reading past the input ends the run as `needs-input` (prompt kept, later output dropped, and a same-thread KeyboardInterrupt stops programs that swallow `EOFError`). The program then re-runs with one more line.
+    - `random` is seeded per session so replays match, and the order of output and errors is preserved.
+    - "Run samples" is still batch.
+  - **Lessons:** every ` ```python ` block (lessons, cheat sheets, exercise answers, editorials) runs in place: a Copy / Edit in IDE / Run bar, with a console under the block. Python and the console load only on Run.
+    - `RunnableExample` runs with its example input, then offers "Type my own input".
+    - Shiki marks blocks with `data-language`, and the MDX `pre` is now `RunnableCode`.
+  - **Problems:** the "Custom input" textarea became an interactive **Console** tab whose input sheet offers each sample's input. The brand-green Run colour is used for Run, Run samples and Send.
+- **Docs and rules:** CLAUDE.md hard rules updated: Pyodide may load on lesson pages only after Run, consoles are interactive, the editor is CodeMirror, and PWA notes were added. PLAN.md R4, R10, D7 and D9 were updated, and D10 (PWA) and D11 (app shell) were added. AUTHORING.md now explains that every Python block is runnable and how `RunnableExample` input works.
+- **Verified:**
+  - `npm run check` ✔ (65 unit tests; new ones cover the line-at-a-time reader, ordered/closable output limiter, console transcript and replay view, and the service-worker build).
+  - `npm run build` ✔.
+  - `npm run test:e2e` **249 passed**. New or updated tests:
+    - the input sheet in the IDE, with example fill and echo;
+    - axe with the sheet open;
+    - lesson inline Run with example input, own input, and a plain answer block;
+    - problem sample chips;
+    - all 22 editorials through CodeMirror;
+    - tab bar and back button at 360 px;
+    - lesson pages load no Pyodide, worker, editor or `InlineRun` until Run;
+    - manifest and icons;
+    - offline pages;
+    - **Python running offline** after one online load.
+  - A scripted check against the real worker passed 9 edge cases: several prompts, pasted lines, read-until-EOF with End input, a `try/except EOFError` loop, an EOF-swallowing infinite loop (asks again within 4 s, under the 5 s time limit), deterministic `random`, traceback order, dismissing the sheet and then Stop, and the time limit.
+  - Screenshots checked at 360 px in light and dark, and on desktop.
+- **Left undone:** nothing deployed or pushed. Not tested on real phones; Chromium only. A program that does heavy work *before* each `input()` repeats that work on every replay, which is fine for teaching-sized programs.
+- **Check by hand:**
+  - Install from Android Chrome and from iOS Safari (Add to Home Screen) and try the IDE with the phone keyboard (key bar, input sheet above the keyboard).
+  - The first visit downloads the 3 MB precache in the background; check this is acceptable on mobile data.
+  - On Render, serve `sw.js` with `Cache-Control: no-cache` (T13).
+- **Needs coach review:** small wording edits "playground" → "IDE" in `src/content/algorithms/complexity.mdx`, `src/content/fundamentals/conditionals.mdx` and `src/content/fundamentals/loops.mdx`. Also check whether fragment code blocks that now show Run (e.g. `reachable()` in BFS/DFS, which needs `adj`) should say they are parts of a bigger program.
+
+## 2026-11-03: Section headers, one-row filters, coloured lists, no em dashes in the UI
+
+- **Headers:** each section has its own colour and icon (`PageHeader`, `Meter` in `src/components/layout/PageHeader.tsx`; tone classes in `globals.css`): Home and Lessons green, Cheat sheets sky, Practice amber, My progress violet. Each header shows a live summary and a meter that grows on load (off with reduced motion).
+  - **Home:** the description now reads "Follow the roadmap, read short lessons". The continue card has a play tile, there is an overall lessons meter, and each roadmap stage has its own count and meter. Step circles fill with a check when a lesson is done.
+  - **Lessons:** "N of 20 lessons done" with a meter, a done count per category, and coloured level badges (`LevelBadge`).
+  - **Practice:** "N of 22 solved on the samples" with a meter.
+  - **My progress:** shorter storage note inside the header, and the three stat boxes sit in one row with meters (Lessons done, Solved on samples, Tried).
+- **Practice filters:** level, topic and status are native selects styled as pills in one row (`.filter-pill`). Active filters take the section colour. "Showing N of M" and Clear filters share a row. Problem rows have a difficulty stripe (`.row-stripe`) and coloured difficulty badges (`DifficultyBadge`).
+- **Em dashes:** removed from all UI strings, the manifest name, problem hints and output specs, and the lesson summaries shown in lists. 159 remain inside lesson and cheat-sheet bodies (43 files).
+- **Verified:**
+  - `npm run check` ✔ (65 unit tests).
+  - `npm run build` ✔.
+  - `npm run test:e2e`: 247 passed on the first run; 2 axe failures (muted text on the sky and violet tints) were fixed and the axe suite re-run, 108 passed. The filter test now uses the Difficulty select.
+  - Screenshots checked at 360 px in light and dark with seeded progress; no horizontal scroll.
+- **Needs coach review:** reworded summaries (em dashes removed) in `bfs-dfs`, `complexity`, `dp-intro`, `gcd-primes-modulo`, `greedy`, `operators`, `strings` (lesson and cheat sheet) and `stdlib-recipes`. Also reworded hints/output specs in 13 `problem.ts` files.
+
+## 2026-11-03: Compact problem pages
+
+- **Header:** a practice-coloured header with a difficulty stripe, coloured difficulty badge, topic tags and the solved/attempted badge. Breadcrumbs show from `md` up only, since the app bar already has a back button on phones (`Breadcrumbs` takes a `className`).
+- **Statement:** Input, Output and Constraints sit in one bordered list; constraints are small code chips.
+- **Samples:** one card per sample with input and output side by side (also at 360 px; long lines scroll inside their cell), and the explanation in the card footer. The trailing newline is no longer shown as an empty line.
+- **Help:** Hints (with a shown/total count) and Editorial are two compact rows in one box. The `#editorial-heading ~ div` structure used by the e2e editorial test is kept.
+- **Related lessons:** pill links with the done mark.
+- **Workbench:** Stop and Reset code are icon buttons on phones (accessible names unchanged), so the toolbar fits one row. The Ctrl/⌘ + Enter tip shows only from `md` up.
+- **Verified:** `npm run check` ✔, `npm run build` ✔, `npm run test:e2e`: 227 passed on the full run. The 22 axe failures it found (sample labels too light on grey) were fixed, and the axe suite was re-run (108 passed). Screenshots checked at 360 px in light and dark; no horizontal scroll.

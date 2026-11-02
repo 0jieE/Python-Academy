@@ -10,9 +10,6 @@ export const PYODIDE_VERSION = '314.0.7'
 export const PYODIDE_INDEX_URL: string =
   import.meta.env.VITE_PYODIDE_INDEX_URL ?? `https://cdn.jsdelivr.net/npm/pyodide@${PYODIDE_VERSION}/`
 
-/** Monaco (desktop editor) also comes from jsDelivr, pinned to the version @monaco-editor/loader 1.7 expects. */
-export const MONACO_VS_URL = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs'
-
 export const RUN_DEFAULTS = {
   timeLimitMs: 5_000, // playground; problems may set their own
   maxOutputChars: 200_000,

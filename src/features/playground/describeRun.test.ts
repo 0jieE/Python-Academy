@@ -7,9 +7,10 @@ const result = (status: RunResult['status'], durationMs = 12): RunResult => ({ s
 describe('describeRun', () => {
   it('describes each outcome', () => {
     expect(describeRun('finished', result('finished'), null)).toBe('Finished in 12 ms')
-    expect(describeRun('error', result('error', 0), null)).toBe('Finished with an error (see below)')
-    expect(describeRun('loading', result('timeout', 5000), null)).toBe('Time limit exceeded — stopped after 5.0 s · Restarting Python…')
+    expect(describeRun('error', result('error', 0), null)).toBe('Finished with an error')
+    expect(describeRun('loading', result('timeout', 5000), null)).toBe('Time limit exceeded: stopped after 5.0 s · Restarting Python…')
     expect(describeRun('running', null, null)).toBe('Running…')
+    expect(describeRun('needs-input', result('needs-input'), null)).toBe('Waiting for input')
   })
 
   it('reports a load failure, not a Python error', () => {

@@ -126,11 +126,18 @@ print(max(map(int, input().split())))
 Sorting costs <Complexity time="O(N log N)" space="O(N)" />.
 ```
 
-**RunnableExample** — a code block with an "Open in Playground" button that
-copies the code and stdin into the playground. Python does **not** load on the
-lesson page; it only loads when the student opens the playground.
+**Every ```python block is runnable.** Students press **Run** under the block
+and the output appears right there; if the program calls `input()`, a sheet pops
+up and asks for it. Python loads only when Run is pressed. So write code blocks
+that run on their own where you can (define what they use, print something). A
+fragment that needs earlier code still shows Run — that's fine, but say in the
+text that it's part of a bigger program. ```text blocks get no Run button.
 
-````mdx
+**RunnableExample** — a titled example with **example input**. Run feeds the
+`stdin` to the program (then end of input), so the output appears in one tap;
+"Type my own input" runs it again asking for input. "Edit in IDE" copies code
+and input into the IDE.
+
 <RunnableExample title="Sum of a line" stdin="1 2 3">
 
 ```python

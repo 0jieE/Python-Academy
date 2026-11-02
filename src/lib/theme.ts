@@ -46,4 +46,8 @@ export function applyTheme(theme: ResolvedTheme): void {
   const root = document.documentElement
   root.classList.toggle('dark', theme === 'dark')
   root.style.colorScheme = theme
+  // Phone status bar / installed-app title bar follow the chosen theme, not just the OS one.
+  for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
+    meta.content = theme === 'dark' ? '#0a0a0a' : '#ffffff'
+  }
 }

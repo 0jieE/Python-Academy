@@ -52,6 +52,590 @@ h1[tabindex='-1']:focus {
   display: block;
   overflow-x: auto; /* wide tables scroll instead of breaking mobile layout */
 }
+
+/* ---- App tokens ------------------------------------------------------------
+ * Console slate is dark in both themes (it is a terminal). Highlighter yellow
+ * marks only what the student typed. Emerald = action / success.          */
+:root {
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --tabbar-h: calc(4rem + env(safe-area-inset-bottom));
+  --brand: #047857;
+  --brand-soft: rgb(4 120 87 / 0.12);
+  --run: #047857;
+  --run-foreground: #ffffff;
+  --highlighter: #facc15;
+  --console-bg: #0f1a1c;
+  --console-fg: #e2ebe8;
+  --console-muted: #95a8a4;
+  --console-err: #ff9f94;
+  --console-ok: #4ade80;
+  --console-line: rgb(255 255 255 / 0.09);
+  --console-in-fg: #fde68a;
+  --console-in-bg: rgb(250 204 21 / 0.16);
+  --editor-caret: #047857;
+  --editor-active-line: rgb(4 120 87 / 0.06);
+  --editor-selection: rgb(4 120 87 / 0.2);
+  /* github-light-default, to match the Shiki blocks in lessons */
+  --syn-keyword: #cf222e;
+  --syn-string: #0a3069;
+  --syn-comment: #6e7781;
+  --syn-number: #0550ae;
+  --syn-function: #8250df;
+  --syn-class: #953800;
+}
+.dark {
+  --brand: #34d399;
+  --brand-soft: rgb(52 211 153 / 0.16);
+  --run: #34d399;
+  --run-foreground: #022c22;
+  --console-bg: #0a1315;
+  --editor-caret: #34d399;
+  --editor-active-line: rgb(255 255 255 / 0.04);
+  --editor-selection: rgb(52 211 153 / 0.24);
+  /* github-dark-default */
+  --syn-keyword: #ff7b72;
+  --syn-string: #a5d6ff;
+  --syn-comment: #8b949e;
+  --syn-number: #79c0ff;
+  --syn-function: #d2a8ff;
+  --syn-class: #ffa657;
+}
+@media (min-width: 48rem) {
+  :root {
+    --tabbar-h: 0px;
+  }
+}
+
+/* ---- Touch + app feel ----------------------------------------------------- */
+html {
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+}
+a,
+button,
+summary,
+[role='button'] {
+  touch-action: manipulation;
+}
+.app-header {
+  padding-top: env(safe-area-inset-top);
+  view-transition-name: app-header;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Component classes live in a layer so Tailwind utilities on the same element
+   (md:hidden, h-10, …) still win. */
+@layer components {
+  /* Section colours: each part of the app has its own tint (page header, meters, active filters). */
+  .tone-home,
+  .tone-learn {
+    --tone: #047857;
+    --tone-soft: #ecfdf5;
+  }
+  .tone-sheets {
+    --tone: #0369a1;
+    --tone-soft: #f0f9ff;
+  }
+  .tone-practice {
+    --tone: #b45309;
+    --tone-soft: #fffbeb;
+  }
+  .tone-progress {
+    --tone: #6d28d9;
+    --tone-soft: #f5f3ff;
+  }
+  .dark .tone-home,
+  .dark .tone-learn {
+    --tone: #34d399;
+    --tone-soft: rgb(52 211 153 / 0.1);
+  }
+  .dark .tone-sheets {
+    --tone: #38bdf8;
+    --tone-soft: rgb(56 189 248 / 0.1);
+  }
+  .dark .tone-practice {
+    --tone: #fbbf24;
+    --tone-soft: rgb(251 191 36 / 0.1);
+  }
+  .dark .tone-progress {
+    --tone: #a78bfa;
+    --tone-soft: rgb(167 139 250 / 0.12);
+  }
+
+  .page-header {
+    border-radius: 1.25rem;
+    background: var(--tone-soft);
+    padding: 1.25rem;
+  }
+  .page-icon {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.875rem;
+    background: var(--tone);
+    color: var(--background);
+  }
+
+  .meter {
+    height: 0.375rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--tone) 16%, transparent);
+  }
+  .meter-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--tone);
+    transform-origin: left;
+    animation: meter-grow 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes meter-grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .meter-fill {
+      animation: none;
+    }
+  }
+
+  /* Filter pills (native selects: best pickers on phones) */
+  .filter-pill {
+    position: relative;
+    min-width: 0;
+  }
+  .filter-pill select {
+    height: 2.5rem;
+    width: 100%;
+    appearance: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid var(--input);
+    border-radius: 999px;
+    background: var(--background);
+    padding: 0 1.5rem 0 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--foreground);
+  }
+  .filter-pill select:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .filter-pill[data-active='true'] select {
+    border-color: var(--tone);
+    background: var(--tone-soft);
+    color: var(--tone);
+    font-weight: 600;
+  }
+  .filter-pill svg {
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    translate: 0 -50%;
+    color: var(--muted-foreground);
+  }
+  .filter-pill[data-active='true'] svg {
+    color: var(--tone);
+  }
+
+  /* A coloured stripe on the left of a list row (problem difficulty, section colour) */
+  .row-stripe {
+    position: relative;
+  }
+  .row-stripe::before {
+    content: '';
+    position: absolute;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    left: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--stripe, var(--tone));
+  }
+  .difficulty-easy {
+    --stripe: #10b981;
+  }
+  .difficulty-medium {
+    --stripe: #f59e0b;
+  }
+  .difficulty-hard {
+    --stripe: #f43f5e;
+  }
+
+  /* Bottom tab bar (phones) */
+  .tabbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    border-top: 1px solid var(--border);
+    background: color-mix(in oklab, var(--background) 92%, transparent);
+    backdrop-filter: blur(12px);
+    padding-bottom: env(safe-area-inset-bottom);
+    user-select: none;
+    view-transition-name: tabbar;
+  }
+  .tabbar-link {
+    display: flex;
+    height: 4rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+  .tabbar-link[aria-current='page'] {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+  .tabbar-link:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -4px;
+    border-radius: 0.75rem;
+  }
+  .tabbar-pill {
+    display: flex;
+    height: 2rem;
+    width: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    transition:
+      background-color 200ms,
+      transform 120ms;
+  }
+  .tabbar-pill.is-active {
+    background: var(--brand-soft);
+    color: var(--brand);
+  }
+  .tabbar-link:active .tabbar-pill {
+    transform: scale(0.92);
+  }
+  /* Typing on a phone: give the keyboard the space. */
+  @media (pointer: coarse) {
+    :root:has(.cm-focused, .input-field:focus) .tabbar {
+      display: none;
+    }
+  }
+
+  .update-pill {
+    position: fixed;
+    bottom: calc(var(--tabbar-h) + 0.75rem);
+    left: 50%;
+    z-index: 45;
+    display: flex;
+    translate: -50% 0;
+    align-items: center;
+    gap: 0.75rem;
+    white-space: nowrap;
+    border-radius: 999px;
+    background: var(--foreground);
+    padding: 0.3rem 0.3rem 0.3rem 1rem;
+    font-size: 0.875rem;
+    color: var(--background);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.2);
+  }
+  @media (min-width: 48rem) {
+    .update-pill {
+      bottom: 1.5rem;
+    }
+  }
+
+  /* ---- Console -------------------------------------------------------------- */
+  .console {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: var(--console-bg);
+    color: var(--console-fg);
+  }
+  .console-bar {
+    display: flex;
+    min-height: 2.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.625rem;
+    border-bottom: 1px solid var(--console-line);
+    padding: 0 0.25rem 0 0.875rem;
+    font-size: 0.8125rem;
+    color: var(--console-muted);
+  }
+  .console-dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--console-muted);
+  }
+  .console[data-tone='busy'] .console-dot {
+    background: var(--console-fg);
+    animation: console-pulse 1s ease-in-out infinite;
+  }
+  .console[data-tone='waiting'] .console-dot {
+    background: var(--highlighter);
+  }
+  .console[data-tone='ok'] .console-dot {
+    background: var(--console-ok);
+  }
+  .console[data-tone='bad'] .console-dot {
+    background: var(--console-err);
+  }
+  .console[data-tone='bad'] .console-bar [role='status'] {
+    color: var(--console-err);
+  }
+  .console-body {
+    min-height: 4.5rem;
+    flex: 1;
+    overflow: auto;
+    margin: 0;
+    padding: 0.75rem 0.875rem 1rem;
+    font: 0.875rem/1.6 var(--font-mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .console-body:focus-visible,
+  .console :focus-visible {
+    outline: 2px solid var(--highlighter);
+    outline-offset: -2px;
+  }
+  .console-err {
+    color: var(--console-err);
+  }
+  .console-in {
+    border-radius: 2px;
+    background: var(--console-in-bg);
+    box-shadow: inset 0 -2px 0 var(--highlighter);
+    color: var(--console-in-fg);
+    box-decoration-break: clone;
+  }
+  .console-caret {
+    display: inline-block;
+    height: 1.15em;
+    width: 0.55em;
+    vertical-align: text-bottom;
+    background: var(--highlighter);
+    animation: console-blink 1.1s steps(1) infinite;
+  }
+  .console-muted {
+    color: var(--console-muted);
+  }
+  .console-note {
+    border-top: 1px solid var(--console-line);
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+    color: var(--console-muted);
+  }
+  /* The prompt line repeated in the input sheet */
+  .console-prompt {
+    border-left: 3px solid var(--highlighter);
+    border-radius: 0.5rem;
+    background: var(--console-bg);
+    padding: 0.5rem 0.75rem;
+    font: 0.9375rem/1.5 var(--font-mono);
+    color: var(--console-fg);
+    overflow-wrap: anywhere;
+  }
+  @keyframes console-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes console-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .console-caret,
+    .console[data-tone='busy'] .console-dot {
+      animation: none;
+    }
+  }
+
+  /* ---- Code editor ---------------------------------------------------------- */
+  .code-editor {
+    font-size: 14px;
+  }
+  @media (pointer: coarse) {
+    .code-editor {
+      font-size: 15px;
+    }
+  }
+  /* iOS zooms into editable text under 16 px */
+  @supports (-webkit-touch-callout: none) {
+    .code-editor {
+      font-size: 16px;
+    }
+  }
+
+  .keybar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--background);
+    padding: 0.375rem 0.5rem;
+  }
+  .keybar-scroll {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
+  }
+  .keybar-key {
+    display: inline-flex;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: var(--muted);
+    font: 500 1rem var(--font-mono);
+    color: var(--foreground);
+    user-select: none;
+  }
+  .keybar-key:active {
+    background: var(--accent);
+    transform: scale(0.94);
+  }
+  .keybar-key:focus-visible {
+    outline: 2px solid var(--ring);
+  }
+
+  /* ---- IDE ------------------------------------------------------------------ */
+  .ide {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+  }
+  .ide-code {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+  }
+  .ide-toolbar {
+    display: flex;
+    min-height: calc(3.25rem + env(safe-area-inset-top));
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    padding: env(safe-area-inset-top) 0.5rem 0 1rem;
+  }
+  .ide-editor {
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  .ide-console {
+    height: 2.75rem; /* collapsed: just the status bar */
+    flex-shrink: 0;
+    border-radius: 0;
+    transition: height 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .ide-console.is-open {
+    height: 42dvh;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ide-console {
+      transition: none;
+    }
+  }
+  @media (min-width: 48rem) {
+    .ide-console,
+    .ide-console.is-open {
+      height: 40%;
+    }
+  }
+  @media (min-width: 64rem) {
+    .ide {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.75fr);
+    }
+    .ide-console,
+    .ide-console.is-open {
+      height: auto;
+    }
+  }
+
+  /* ---- Runnable code blocks in lessons -------------------------------------- */
+  .code-run {
+    margin: 1.5rem 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+  }
+  .code-run-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-top: 1px solid var(--border);
+    background: color-mix(in oklab, var(--muted) 60%, transparent);
+    padding: 0.25rem;
+  }
+  .code-run-head {
+    border-top: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-run .console {
+    border-radius: 0;
+  }
+  .code-run-input {
+    border-top: 1px solid var(--border);
+    border-left: 3px solid var(--highlighter);
+    padding: 0.5rem 0.875rem;
+  }
+}
+
+/* Unlayered on purpose: these override button utilities and the unlayered .shiki rule. */
+.console-bar button,
+.console-note button:not(.console-input-btn) {
+  background: transparent;
+  color: var(--console-fg);
+}
+.console-bar button:hover,
+.console-note button:not(.console-input-btn):hover {
+  background: rgb(255 255 255 / 0.08);
+  color: var(--console-fg);
+}
+.console-input-btn {
+  background: var(--highlighter);
+  color: #1c1700;
+}
+.console-input-btn:hover {
+  background: #eab308;
+}
+.code-run .shiki {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
 /*
  ---break---
  */

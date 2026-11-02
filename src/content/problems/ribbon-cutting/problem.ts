@@ -31,7 +31,7 @@ const problem: ProblemDefinition = {
   ],
   hints: [
     'If length L works, every shorter length works too. If L fails, every longer length fails.',
-    'That makes the answer a "last true" position — binary search on L between 1 and max(a).',
+    'That makes the answer a "last true" position: binary search on L between 1 and max(a).',
     'For a fixed L, the number of pieces is the sum of a_i // L.',
   ],
   timeLimitMs: 3000,

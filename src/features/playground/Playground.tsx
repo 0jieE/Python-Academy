@@ -1,114 +1,149 @@
-import { Play, Square } from 'lucide-react'
-import { useCallback, useEffect, useId, useState } from 'react'
+import { Check, ChevronDown, Copy, FilePlus, Play, Square } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { Button } from '@/components/ui/button'
+import { KeyBar } from '@/features/editor/KeyBar'
+import type { EditorHandle } from '@/features/editor/types'
+import { cn } from '@/lib/utils'
 import { CodeEditor } from './CodeEditor'
-import { OutputPanel } from './OutputPanel'
-import { decodePlaygroundHash, type PlaygroundState } from './urlState'
-import { useRunner } from './useRunner'
+import { RunConsole } from './RunConsole'
+import { decodePlaygroundHash } from './urlState'
+import { useRunSession } from './useRunSession'
 
-const STORAGE_KEY = 'pyacademy:playground'
-const DEFAULT_STATE: PlaygroundState = {
-  code: '# Read two numbers from one line and print their sum\na, b = map(int, input().split())\nprint(a + b)\n',
-  stdin: '3 4\n',
+interface IdeState {
+  code: string
+  /** Input that came with "Open in IDE" (offered in the input sheet). */
+  example: string
 }
 
-function loadSaved(): PlaygroundState {
+const STORAGE_KEY = 'pyacademy:ide'
+const OLD_SESSION_KEY = 'pyacademy:playground'
+const DEFAULT_STATE: IdeState = {
+  code: 'name = input("What is your name? ")\nprint(f"Hello, {name}!")\n',
+  example: '',
+}
+
+function parse(raw: string | null): IdeState | null {
+  if (!raw) return null
+  const s = JSON.parse(raw) as { code?: unknown; example?: unknown; stdin?: unknown }
+  if (typeof s.code !== 'string') return null
+  const example = typeof s.example === 'string' ? s.example : typeof s.stdin === 'string' ? s.stdin : ''
+  return { code: s.code, example }
+}
+
+function loadSaved(): IdeState {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const s = JSON.parse(raw) as Partial<PlaygroundState>
-      if (typeof s.code === 'string' && typeof s.stdin === 'string') return { code: s.code, stdin: s.stdin }
-    }
+    return parse(localStorage.getItem(STORAGE_KEY)) ?? parse(sessionStorage.getItem(OLD_SESSION_KEY)) ?? DEFAULT_STATE
   } catch {
-    // Storage blocked or corrupt → start fresh.
+    return DEFAULT_STATE // storage blocked or corrupt → start fresh
   }
-  return DEFAULT_STATE
 }
 
-function save(state: PlaygroundState) {
+function save(state: IdeState) {
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
-    // Storage blocked: work is kept only until the tab closes.
+    // Storage blocked: the code lives until the tab closes.
   }
 }
 
+/** The pocket IDE: editor + console. Input is asked for while the program runs. */
 export function Playground() {
   const location = useLocation()
   const navigate = useNavigate()
-  // Code from an "Open in Playground" link (URL hash) wins over the saved session.
-  const [state, setState] = useState<PlaygroundState>(() => {
+  // Code from an "Open in IDE" link (URL hash) wins over the saved file.
+  const [state, setState] = useState<IdeState>(() => {
     const fromUrl = decodePlaygroundHash(location.hash)
-    return fromUrl.code !== undefined ? { code: fromUrl.code, stdin: fromUrl.stdin ?? '' } : loadSaved()
+    return fromUrl.code !== undefined ? { code: fromUrl.code, example: fromUrl.stdin ?? '' } : loadSaved()
   })
-  const { status, stdout, stderr, result, run, stop, warmUp, loadError } = useRunner()
-  const stdinId = useId()
+  const session = useRunSession()
+  const editor = useRef<EditorHandle>(null)
+  const [consoleOpen, setConsoleOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  // Save every edit so a refresh keeps the work; drop the (possibly long) hash once imported.
   useEffect(() => save(state), [state])
   useEffect(() => {
     if (location.hash) navigate({ pathname: location.pathname, hash: '' }, { replace: true })
   }, [location.hash, location.pathname, navigate])
 
-  const running = status === 'running'
+  const busy = session.phase === 'running' || session.phase === 'waiting'
+  const { start, stop } = session
   const onRun = useCallback(() => {
-    if (!running) void run(state.code, state.stdin)
-  }, [running, run, state.code, state.stdin])
+    setConsoleOpen(true)
+    start(state.code)
+  }, [start, state.code])
 
-  const runOnCtrlEnter = (e: React.KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault()
-      onRun()
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(state.code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // Clipboard blocked: nothing to do.
     }
   }
 
+  const runButton = (className: string) => (
+    <Button onClick={busy ? stop : onRun} variant={busy ? 'outline' : 'run'} className={cn('run-button', className)}>
+      {busy ? <Square aria-hidden className="size-3.5 fill-current" /> : <Play aria-hidden />}
+      {busy ? 'Stop' : 'Run'}
+    </Button>
+  )
+
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <section aria-label="Code" className="min-w-0 space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-semibold">Code</h2>
-          <div className="flex items-center gap-2">
-            <span className="hidden text-xs text-muted-foreground sm:inline">Ctrl/⌘ + Enter</span>
-            <Button onClick={onRun} disabled={running} className="h-10 px-4">
-              <Play aria-hidden /> Run
+    <div className="ide">
+      <section aria-label="Code" className="ide-code">
+        <div className="ide-toolbar">
+          <h1 className="text-base font-semibold">IDE</h1>
+          <span className="font-mono text-sm text-muted-foreground">main.py</span>
+          <div className="ml-auto flex items-center">
+            <Button variant="ghost" size="icon" className="size-10" aria-label="New file (clears the code; Undo brings it back)" title="New file" onClick={() => setState((s) => ({ ...s, code: '' }))}>
+              <FilePlus className="size-5" />
             </Button>
-            <Button onClick={stop} disabled={!running} variant="outline" className="h-10 px-4">
-              <Square aria-hidden /> Stop
+            <Button variant="ghost" size="icon" className="size-10" aria-label={copied ? 'Copied' : 'Copy code'} title="Copy code" onClick={() => void copy()}>
+              {copied ? <Check className="size-5" /> : <Copy className="size-5" />}
             </Button>
+            <div className="md:hidden">
+              <ThemeToggle />
+            </div>
+            {runButton('ml-2 hidden h-10 px-4 md:inline-flex')}
           </div>
         </div>
-        <CodeEditor
-          label="Python code"
-          value={state.code}
-          onChange={(code) => setState((s) => ({ ...s, code }))}
-          onRun={onRun}
-          onFocus={warmUp}
-        />
-      </section>
-
-      <div className="min-w-0 space-y-4">
-        <div className="space-y-2">
-          <label htmlFor={stdinId} className="font-semibold">
-            Input (stdin)
-          </label>
-          <p className="text-xs text-muted-foreground">Type all input before pressing Run — like a contest judge, the program reads it from here.</p>
-          <textarea
-            id={stdinId}
-            value={state.stdin}
-            onChange={(e) => setState((s) => ({ ...s, stdin: e.target.value }))}
-            onFocus={warmUp}
-            onKeyDown={runOnCtrlEnter}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoCorrect="off"
-            wrap="off"
-            rows={5}
-            className="block w-full resize-y rounded-lg border bg-background p-3 font-mono text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-sm"
+        <div className="ide-editor">
+          <CodeEditor
+            label="Python code"
+            value={state.code}
+            onChange={(code) => setState((s) => ({ ...s, code }))}
+            onRun={onRun}
+            onFocus={session.warmUp}
+            editorRef={editor}
+            className="h-full"
           />
         </div>
-        <OutputPanel status={status} stdout={stdout} stderr={stderr} result={result} loadError={loadError} />
-      </div>
+        <KeyBar editor={editor} className="md:hidden">
+          {runButton('h-10 shrink-0 px-4')}
+        </KeyBar>
+      </section>
+
+      <RunConsole
+        session={session}
+        examples={state.example ? [{ label: 'Example input', text: state.example }] : undefined}
+        className={cn('ide-console', consoleOpen && 'is-open')}
+        placeholder="Output appears here. When your program calls input(), you'll be asked to type it."
+        actions={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="console-toggle size-10 md:hidden"
+            aria-label={consoleOpen ? 'Collapse console' : 'Expand console'}
+            aria-expanded={consoleOpen}
+            onClick={() => setConsoleOpen((o) => !o)}
+          >
+            <ChevronDown className={cn('size-5 transition-transform motion-reduce:transition-none', !consoleOpen && 'rotate-180')} />
+          </Button>
+        }
+      />
     </div>
   )
 }

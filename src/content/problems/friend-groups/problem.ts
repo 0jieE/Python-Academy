@@ -26,7 +26,7 @@ const problem: ProblemDefinition = {
   hints: [
     'Students are nodes and friendships are edges. A friend group is a connected component.',
     'Start a search (DFS or BFS) from every student not seen yet; each new start is a new group.',
-    'With up to 2·10^5 students, a recursive DFS can hit Python\'s recursion limit — use a stack list instead.',
+    'With up to 2·10^5 students, a recursive DFS can hit Python\'s recursion limit, so use a stack list instead.',
   ],
   timeLimitMs: 3000,
   compareMode: 'tokens-per-line',

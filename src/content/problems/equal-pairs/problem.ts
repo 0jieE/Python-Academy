@@ -20,7 +20,7 @@ const problem: ProblemDefinition = {
     { name: 'All the same', input: '4\n7 7 7 7\n', expectedOutput: '6\n', explanation: '4 equal values make 4 · 3 / 2 = 6 pairs.' },
   ],
   hints: [
-    'Comparing every pair is O(N²) — about 2·10^10 checks.',
+    'Comparing every pair is O(N²), about 2·10^10 checks.',
     'Count how many times each value appears.',
     'A value that appears c times forms c · (c − 1) / 2 pairs.',
   ],

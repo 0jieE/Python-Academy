@@ -1,35 +1,16 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense } from 'react'
+import type { CodeEditorProps } from '@/features/editor/types'
 import { cn } from '@/lib/utils'
 
-const MonacoEditor = lazy(() => import('./MonacoEditor'))
+export type { CodeEditorProps } from '@/features/editor/types'
 
-export interface CodeEditorProps {
-  value: string
-  onChange: (value: string) => void
-  /** Ctrl/⌘+Enter. */
-  onRun: () => void
-  /** Good moment to start loading Python. */
-  onFocus?: () => void
-  label: string
-  className?: string
-}
+const PythonEditor = lazy(() => import('@/features/editor/PythonEditor'))
 
-/** Monaco on desktop (fine pointer, ≥ 768 px); a plain textarea on touch / narrow screens. */
-function prefersMonaco() {
-  try {
-    return window.matchMedia('(pointer: fine) and (min-width: 768px)').matches
-  } catch {
-    return false
-  }
-}
-
+/** CodeMirror (highlighting, auto-indent, brackets); a plain textarea while it loads. */
 export function CodeEditor(props: CodeEditorProps) {
-  const [useMonaco, setUseMonaco] = useState(prefersMonaco)
-  if (!useMonaco) return <TextareaEditor {...props} />
   return (
-    // While Monaco downloads, the textarea is already usable.
     <Suspense fallback={<TextareaEditor {...props} />}>
-      <MonacoEditor {...props} onLoadError={() => setUseMonaco(false)} />
+      <PythonEditor {...props} />
     </Suspense>
   )
 }
@@ -52,10 +33,7 @@ export function TextareaEditor({ value, onChange, onRun, onFocus, label, classNa
       autoCorrect="off"
       autoComplete="off"
       wrap="off"
-      className={cn(
-        'block min-h-72 w-full resize-y rounded-lg border bg-background p-3 font-mono text-base leading-relaxed outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-sm',
-        className,
-      )}
+      className={cn('code-editor block w-full resize-none bg-transparent p-3 pl-12 font-mono leading-relaxed outline-none', className)}
     />
   )
 }

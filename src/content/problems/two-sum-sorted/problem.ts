@@ -26,7 +26,7 @@ const problem: ProblemDefinition = {
     },
   ],
   hints: [
-    'Checking every pair is O(N²) — about 2·10^10 pairs for the largest input.',
+    'Checking every pair is O(N²), about 2·10^10 pairs for the largest input.',
     'Put one pointer at the smallest number and one at the largest. If their sum is too small, which pointer should move?',
   ],
   timeLimitMs: 2000,

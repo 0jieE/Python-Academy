@@ -48,7 +48,7 @@ const readSource = (globKey: string) => readFileSync(join(ROOT, globKey), 'utf8'
 
 async function main() {
   if (!existsSync(join(ROOT, 'dist'))) {
-    console.error('search index: dist/ not found — run `vite build` first')
+    console.error('search index: dist/ not found, run `vite build` first')
     process.exit(1)
   }
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')) as ContentManifest

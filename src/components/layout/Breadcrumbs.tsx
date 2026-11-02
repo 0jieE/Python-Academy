@@ -8,9 +8,9 @@ export interface Crumb {
   to?: string
 }
 
-export function Breadcrumbs({ items }: { items: Crumb[] }) {
+export function Breadcrumbs({ items, className }: { items: Crumb[]; className?: string }) {
   return (
-    <nav aria-label="Breadcrumb">
+    <nav aria-label="Breadcrumb" className={className}>
       <ol className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
         {items.map((c, i) => (
           <li key={c.to ?? c.label} className="inline-flex items-center gap-1.5">

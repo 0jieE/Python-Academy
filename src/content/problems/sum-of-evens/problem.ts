@@ -14,7 +14,7 @@ const problem: ProblemDefinition = {
     { name: 'No even numbers', input: '3\n1 3 5\n', expectedOutput: '0\n', explanation: 'Edge case: the sum of nothing is 0.' },
     { name: 'Negatives and zero', input: '4\n-2 -3 10 0\n', expectedOutput: '8\n', explanation: '-2, 10 and 0 are even: -2 + 10 + 0 = 8.' },
   ],
-  hints: ['A number x is even when x % 2 == 0 — this also works for negative numbers in Python.', 'Start a total at 0 and add to it inside a for loop.'],
+  hints: ['A number x is even when x % 2 == 0. This also works for negative numbers in Python.', 'Start a total at 0 and add to it inside a for loop.'],
   timeLimitMs: 2000,
   compareMode: 'tokens-per-line',
   starterCode: 'n = int(input())\nnums = list(map(int, input().split()))\n',

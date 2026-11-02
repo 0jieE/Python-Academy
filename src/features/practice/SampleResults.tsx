@@ -53,7 +53,7 @@ export function SampleResults({ outcomes, total, running }: { outcomes: SampleOu
                       {label}
                     </span>
                   </td>
-                  <td className="py-2 text-right tabular-nums text-muted-foreground">{o.verdict === 'skipped' ? '—' : `${o.durationMs} ms`}</td>
+                  <td className="py-2 text-right tabular-nums text-muted-foreground">{o.verdict === 'skipped' ? '-' : `${o.durationMs} ms`}</td>
                 </tr>
               )
             })}

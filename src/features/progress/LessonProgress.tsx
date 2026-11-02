@@ -15,7 +15,7 @@ export function LessonCompleteButton({ lessonId }: { lessonId: string }) {
       onClick={() => update((p) => setLessonComplete(p, lessonId, !done))}
     >
       {done ? <CircleCheck aria-hidden className="text-emerald-600 dark:text-emerald-400" /> : <Check aria-hidden />}
-      {done ? 'Completed — click to undo' : 'Mark as complete'}
+      {done ? 'Completed (tap to undo)' : 'Mark as complete'}
     </Button>
   )
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createStdinReader, normalizeStdin, OutputLimiter } from './runnerUtils'
+import { createLineReader, createStdinReader, normalizeStdin, OutputLimiter } from './runnerUtils'
 
 function readAll(read: (b: Uint8Array) => number, chunkSize: number): string {
   const parts: Uint8Array[] = []
@@ -35,7 +35,71 @@ describe('stdin', () => {
   })
 })
 
+describe('createLineReader (console mode)', () => {
+  const setup = (text: string, eof: boolean) => {
+    const lines: string[] = []
+    let exhausted = 0
+    const read = createLineReader(text, eof, { onLine: (t) => lines.push(t), onExhausted: () => exhausted++ })
+    return { read, lines, exhausted: () => exhausted }
+  }
+  const take = (read: (b: Uint8Array) => number, size = 64) => {
+    const buf = new Uint8Array(size)
+    return new TextDecoder().decode(buf.subarray(0, read(buf)))
+  }
+
+  it('serves one line per read and reports each line', () => {
+    const { read, lines } = setup('3 4\r\nhi\n', true)
+    expect(take(read)).toBe('3 4\n')
+    expect(take(read)).toBe('hi\n')
+    expect(lines).toEqual(['3 4\n', 'hi\n'])
+  })
+
+  it('asks for more input instead of EOF while input is still open', () => {
+    const { read, exhausted } = setup('5\n', false)
+    expect(take(read)).toBe('5\n')
+    expect(read(new Uint8Array(8))).toBe(0)
+    expect(exhausted()).toBe(1)
+  })
+
+  it('returns plain EOF once the student ended the input', () => {
+    const { read, exhausted } = setup('', true)
+    expect(read(new Uint8Array(8))).toBe(0)
+    expect(exhausted()).toBe(0)
+  })
+
+  it('splits a line longer than the buffer and keeps multi-byte characters whole in the echo', () => {
+    const { read, lines } = setup('ñañ\n', true)
+    expect(readAll(read, 2)).toBe('ñañ\n')
+    expect(lines.join('')).toBe('ñañ\n')
+  })
+})
+
 describe('OutputLimiter', () => {
+  it('keeps stdout and stderr in the order they were written', () => {
+    const sent: [string, string][] = []
+    const lim = new OutputLimiter(100, (s, c) => sent.push([s, c]), () => 0)
+    lim.write('stdout', 'a')
+    lim.write('stderr', 'E')
+    lim.write('stdout', 'b')
+    lim.write('stdout', 'c')
+    lim.flush()
+    expect(sent).toEqual([
+      ['stdout', 'a'],
+      ['stderr', 'E'],
+      ['stdout', 'bc'],
+    ])
+  })
+
+  it('close() sends what is pending and drops later writes', () => {
+    const sent: string[] = []
+    const lim = new OutputLimiter(100, (_s, c) => sent.push(c), () => 0)
+    lim.write('stdout', 'Enter n: ')
+    lim.close()
+    lim.write('stderr', 'EOFError…')
+    lim.flush()
+    expect(sent).toEqual(['Enter n: '])
+  })
+
   const collect = () => {
     const sent: [string, string][] = []
     return { sent, send: (s: string, c: string) => sent.push([s, c]) }

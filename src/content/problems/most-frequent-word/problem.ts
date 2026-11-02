@@ -29,7 +29,7 @@ const problem: ProblemDefinition = {
     },
   ],
   hints: [
-    'Read every word with sys.stdin.read().split() — it ignores how the words are split across lines.',
+    'Read every word with sys.stdin.read().split(). It ignores how the words are split across lines.',
     'Count with a dict (or collections.Counter).',
     'Pick the best with min over (−count, word), so higher counts win and ties go to the smaller word.',
   ],

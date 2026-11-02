@@ -24,7 +24,7 @@ const problem: ProblemDefinition = {
     },
   ],
   hints: [
-    'Picking the shortest booking or the earliest start can both fail — try to find a counterexample.',
+    'Picking the shortest booking or the earliest start can both fail. Try to find a counterexample.',
     'Think about which booking should be first: the one that frees the room the soonest.',
     'Sort by end time, then accept every booking that starts at or after the end of the last accepted one.',
   ],

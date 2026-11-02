@@ -7,7 +7,16 @@ import react from '@vitejs/plugin-react'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import type { ShikiTransformer } from 'shiki'
 import { defineConfig } from 'vite'
+
+/** <pre data-language="python"> → the MDX `pre` component (RunnableCode) adds a Run button. */
+const dataLanguage: ShikiTransformer = {
+  name: 'data-language',
+  pre(node) {
+    node.properties.dataLanguage = this.options.lang
+  },
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -20,7 +29,14 @@ export default defineConfig({
         remarkPlugins: [remarkGfm, remarkFrontmatter, remarkMdxFrontmatter],
         // Shiki highlights code blocks at BUILD time: zero runtime JS on lesson pages.
         rehypePlugins: [
-          [rehypeShiki, { themes: { light: 'github-light-default', dark: 'github-dark-default' }, defaultColor: false }],
+          [
+            rehypeShiki,
+            {
+              themes: { light: 'github-light-default', dark: 'github-dark-default' },
+              defaultColor: false,
+              transformers: [dataLanguage],
+            },
+          ],
         ],
       }),
     },

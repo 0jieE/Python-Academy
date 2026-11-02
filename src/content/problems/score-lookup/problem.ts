@@ -24,7 +24,7 @@ const problem: ProblemDefinition = {
     },
   ],
   hints: [
-    'Counting for each query with a loop is O(N · Q) — up to 4·10^10 steps.',
+    'Counting for each query with a loop is O(N · Q): up to 4·10^10 steps.',
     'Sort the scores once.',
     'bisect_left(scores, t) is the number of scores smaller than t, so the answer is N minus that.',
   ],

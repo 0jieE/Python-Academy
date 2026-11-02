@@ -129,7 +129,7 @@ Two nested loops over `N = 10^5` items is `10^10` steps — far too slow.
 
 - Off-by-one: `range(1, n)` stops at `n-1`. To include `n` write `range(1, n + 1)`.
 - Resetting the total **inside** the loop instead of before it.
-- `while` loops that never change their condition — they run forever (the playground stops them at the time limit).
+- `while` loops that never change their condition — they run forever (the IDE stops them at the time limit).
 - Changing a list while looping over it — loop over a copy or build a new list.
 
 ## Competition use

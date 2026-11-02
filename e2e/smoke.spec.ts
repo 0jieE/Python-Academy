@@ -25,14 +25,34 @@ test.describe('360 px wide', () => {
     })
   }
 
-  test('the menu reaches every main section', async ({ page }) => {
+  test('the bottom tab bar reaches every main section', async ({ page }) => {
     await page.goto('/')
-    for (const name of ['Learn', 'Cheat sheets', 'Problems', 'Playground', 'My progress']) {
-      await page.getByRole('button', { name: /open menu/i }).click()
-      await page.getByRole('dialog').getByRole('link', { name }).click()
-      await expect(page.locator('main h1')).toBeVisible()
-      await expect(page.getByRole('dialog')).toBeHidden()
+    const tabs = page.getByRole('navigation', { name: 'Main' })
+    for (const [name, heading] of [
+      ['Learn', 'Lessons'],
+      ['Practice', 'Practice problems'],
+      ['IDE', 'IDE'],
+      ['Progress', 'My progress'],
+      ['Home', /Train for Python/],
+    ] as const) {
+      await tabs.getByRole('link', { name, exact: true }).click()
+      await expect(page.locator('main h1')).toHaveText(heading)
+      await expect(tabs.getByRole('link', { name, exact: true })).toHaveAttribute('aria-current', 'page')
     }
+    // Cheat sheets live under Learn.
+    await tabs.getByRole('link', { name: 'Learn', exact: true }).click()
+    await page.getByRole('main').getByRole('link', { name: /Cheat sheets/ }).click()
+    await expect(page.locator('main h1')).toHaveText('Cheat sheets')
+  })
+
+  test('nested pages have a back button to their section', async ({ page }) => {
+    await page.goto('/problems/sum-of-two')
+    await page.getByRole('button', { name: 'Problems' }).click()
+    await expect(page).toHaveURL(/\/problems$/)
+    await page.getByRole('main').getByRole('link').filter({ hasText: 'Clock Time' }).first().click()
+    await expect(page).toHaveURL(/\/problems\/clock-time$/)
+    await page.getByRole('button', { name: 'Problems' }).click()
+    await expect(page).toHaveURL(/\/problems$/)
   })
 })
 
@@ -46,10 +66,10 @@ test('refreshing a nested route keeps the page', async ({ page }) => {
   await expect(page.locator('main h1')).toHaveText('Two Sum (Sorted)')
 })
 
-test('lesson pages never download Pyodide or Monaco', async ({ page }) => {
+test('lesson pages never download Pyodide or the editor until Run', async ({ page }) => {
   const heavy: string[] = []
   page.on('request', (r) => {
-    if (/pyodide|monaco|\.worker/i.test(r.url())) heavy.push(r.url())
+    if (/pyodide|PythonEditor|InlineRun|\.worker/i.test(r.url())) heavy.push(r.url())
   })
   for (const route of ['/learn/fundamentals/input-output', '/learn/algorithms/sorting', '/cheat-sheets/stdlib-recipes']) {
     await page.goto(route)
@@ -71,7 +91,7 @@ test('problem filters live in the URL', async ({ page }) => {
     await expect(row).toContainText('Medium')
     await expect(row).toContainText('sorting')
   }
-  await page.getByRole('button', { name: 'All', exact: true }).click()
+  await page.getByLabel('Difficulty').selectOption('')
   await expect(page).toHaveURL(/\/problems\?tag=sorting$/)
 })
 

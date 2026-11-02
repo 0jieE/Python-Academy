@@ -13,6 +13,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'retain-on-failure',
+    // The service worker would precache the whole build on every fresh page;
+    // e2e/pwa.spec.ts turns it back on for the offline tests.
+    serviceWorkers: 'block',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

@@ -20,7 +20,7 @@ const problem: ProblemDefinition = {
     { name: 'One coin type', input: '1 12\n4\n', expectedOutput: '3\n' },
   ],
   hints: [
-    'Greedy (largest coin first) does not always work — the first sample shows why.',
+    'Greedy (largest coin first) does not always work. The first sample shows why.',
     'Let best[s] = fewest coins that make exactly s. Then best[s] = 1 + min(best[s − c]) over the coins c ≤ s.',
     'Start with best[0] = 0 and "infinity" everywhere else; fill s = 1, 2, …, X.',
   ],

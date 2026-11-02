@@ -24,7 +24,7 @@ const problem: ProblemDefinition = {
     },
   ],
   hints: [
-    'Adding up each range with a loop is O(N) per query — up to 4·10^10 steps in total. Too slow.',
+    'Adding up each range with a loop is O(N) per query: up to 4·10^10 steps in total. Too slow.',
     'Precompute prefix[i] = a_1 + … + a_i once. Then the sum of l..r is prefix[r] − prefix[l − 1].',
   ],
   timeLimitMs: 2000,

@@ -8,22 +8,28 @@ export function Hints({ hints }: { hints: string[] }) {
   const [shown, setShown] = useState(0)
   if (hints.length === 0) return null
   return (
-    <section aria-labelledby="hints-heading" className="space-y-2">
-      <h2 id="hints-heading" className="font-semibold">
-        Hints
-      </h2>
+    <section aria-labelledby="hints-heading" className="space-y-2 p-3 pl-3.5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="hints-heading" className="flex items-center gap-2 font-semibold">
+          <Lightbulb aria-hidden className="size-4 text-amber-600 dark:text-amber-400" />
+          Hints
+          <span className="text-sm font-normal text-muted-foreground tabular-nums">
+            <span aria-hidden>{shown}/{hints.length}</span>
+            <span className="sr-only">({shown} of {hints.length} shown)</span>
+          </span>
+        </h2>
+        {shown < hints.length && (
+          <Button variant="outline" className="h-10" onClick={() => setShown((n) => n + 1)}>
+            {shown === 0 ? 'Show a hint' : 'Next hint'}
+          </Button>
+        )}
+      </div>
       {shown > 0 && (
         <ol className="list-decimal space-y-1 pl-5 text-sm" aria-live="polite">
           {hints.slice(0, shown).map((h) => (
             <li key={h}>{h}</li>
           ))}
         </ol>
-      )}
-      {shown < hints.length && (
-        <Button variant="outline" className="h-10" onClick={() => setShown((n) => n + 1)}>
-          <Lightbulb aria-hidden />
-          {shown === 0 ? `Show a hint (${hints.length} available)` : `Show hint ${shown + 1} of ${hints.length}`}
-        </Button>
       )}
     </section>
   )
@@ -32,23 +38,31 @@ export function Hints({ hints }: { hints: string[] }) {
 /** Editorial MDX, loaded only when the student asks for it. */
 export function Editorial({ sourcePath }: { sourcePath: string }) {
   const [open, setOpen] = useState(false)
-  return (
-    <section aria-labelledby="editorial-heading" className="space-y-2">
-      <h2 id="editorial-heading" className="font-semibold">
-        Editorial
-      </h2>
-      {open ? (
-        <div className="rounded-lg border p-4">
+  if (open) {
+    return (
+      <section aria-labelledby="editorial-heading" className="space-y-2 p-3 pl-3.5">
+        <h2 id="editorial-heading" className="flex items-center gap-2 font-semibold">
+          <BookOpen aria-hidden className="size-4 text-emerald-700 dark:text-emerald-400" />
+          Editorial
+        </h2>
+        <div>
           <MdxContent sourcePath={sourcePath} />
         </div>
-      ) : (
-        <>
-          <p className="text-sm text-muted-foreground">Try the problem first — the editorial shows a full solution.</p>
-          <Button variant="outline" className="h-10" onClick={() => setOpen(true)}>
-            <BookOpen aria-hidden /> Show editorial
-          </Button>
-        </>
-      )}
+      </section>
+    )
+  }
+  return (
+    <section aria-labelledby="editorial-heading" className="flex items-center justify-between gap-3 p-3 pl-3.5">
+      <div className="min-w-0">
+        <h2 id="editorial-heading" className="flex items-center gap-2 font-semibold">
+          <BookOpen aria-hidden className="size-4 text-emerald-700 dark:text-emerald-400" />
+          Editorial
+        </h2>
+        <p className="text-xs text-muted-foreground">Try the problem first.</p>
+      </div>
+      <Button variant="outline" className="h-10" onClick={() => setOpen(true)}>
+        Show editorial
+      </Button>
     </section>
   )
 }

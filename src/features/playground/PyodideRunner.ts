@@ -146,6 +146,8 @@ export class PyodideRunner implements CodeRunner {
     } else if (msg.type === 'stderr') {
       run.stderr += msg.chunk
       run.callbacks?.onStderr?.(msg.chunk)
+    } else if (msg.type === 'stdin') {
+      run.callbacks?.onStdin?.(msg.chunk)
     } else if (msg.type === 'done') {
       clearTimeout(run.timer)
       this.current = null

@@ -3,10 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit: safe areas on notched phones; interactive-widget: the on-screen keyboard shrinks the layout, so bottom sheets sit above it -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <title>PyAcademy · Python contest training</title>
     <meta name="description" content="Self-paced Python lessons, cheat sheets and practice problems for programming competitions." />
-    <meta name="theme-color" content="#059669" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="PyAcademy" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
       // Apply the theme before first paint (no flash). Mirrors src/lib/theme.ts.
       ;(function () {

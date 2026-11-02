@@ -37,6 +37,7 @@ function verdictFor(result: RunResult, compare: CompareResult): SampleVerdict {
     case 'stopped':
       return 'stopped'
     case 'error':
+    case 'needs-input': // batch runs never ask for input; listed for completeness
       return 'error'
     case 'finished':
       return compare.passed ? 'pass' : 'fail'

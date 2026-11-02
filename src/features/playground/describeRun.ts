@@ -9,15 +9,17 @@ export function describeRun(status: RunnerStatus, result: RunResult | null, load
       case 'finished':
         return `Finished in ${result.durationMs} ms${restarting}`
       case 'error':
-        return loadError ? 'Python could not start' : `Finished with an error (see below)${restarting}`
+        return loadError ? 'Python could not start' : `Finished with an error${restarting}`
       case 'timeout':
-        return `Time limit exceeded — stopped after ${(result.durationMs / 1000).toFixed(1)} s${restarting}`
+        return `Time limit exceeded: stopped after ${(result.durationMs / 1000).toFixed(1)} s${restarting}`
       case 'stopped':
         return `Stopped${restarting}`
+      case 'needs-input':
+        return 'Waiting for input'
     }
   }
-  if (status === 'loading') return 'Starting Python… (first time only, about 6 MB)'
+  if (status === 'loading') return 'Starting Python… (first time: about 6 MB)'
   if (status === 'error' && loadError) return 'Python could not start'
   if (status === 'ready') return 'Python is ready'
-  return 'Python loads when you first press Run.'
+  return 'Press Run to start'
 }

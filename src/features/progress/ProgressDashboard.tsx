@@ -1,6 +1,7 @@
 import { Download, RotateCcw, Upload } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { Link } from 'react-router'
+import { Meter } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -56,10 +57,10 @@ export function ProgressDashboard() {
 
   return (
     <div className="space-y-6">
-      <dl className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Lessons completed" value={`${completed.length} / ${lessons.length}`} />
-        <Stat label="Problems solved (samples)" value={`${solved.length} / ${manifest.problems.length}`} />
-        <Stat label="Problems attempted" value={String(attempted.length + solved.length)} />
+      <dl className="grid grid-cols-3 gap-2 sm:gap-3">
+        <Stat label="Lessons done" value={completed.length} max={lessons.length} />
+        <Stat label="Solved" hint="on samples" value={solved.length} max={manifest.problems.length} />
+        <Stat label="Tried" value={attempted.length + solved.length} max={manifest.problems.length} />
       </dl>
 
       {last && (
@@ -75,7 +76,7 @@ export function ProgressDashboard() {
           </CardHeader>
           <CardContent>
             {completed.length === 0 ? (
-              <p className="text-sm text-muted-foreground">None yet — use “Mark as complete” at the end of a lesson.</p>
+              <p className="text-sm text-muted-foreground">None yet. Use “Mark as complete” at the end of a lesson.</p>
             ) : (
               <ul className="list-disc space-y-1 pl-5 text-sm">
                 {completed.map((l) => <li key={l.id}><Link to={l.url} className="underline-offset-4 hover:underline">{l.title}</Link></li>)}
@@ -86,18 +87,18 @@ export function ProgressDashboard() {
         <Card>
           <CardHeader>
             <CardTitle><h2>Problems</h2></CardTitle>
-            <CardDescription>“Solved” means your code passed every sample — not an official verdict.</CardDescription>
+            <CardDescription>“Solved” means your code passed every sample. It is not an official verdict.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {solved.length + attempted.length === 0 && <p className="text-muted-foreground">No problems tried yet.</p>}
             {solved.length > 0 && (
               <ul className="list-disc space-y-1 pl-5">
-                {solved.map((p) => <li key={p.id}><Link to={p.url} className="underline-offset-4 hover:underline">{p.title}</Link> — solved</li>)}
+                {solved.map((p) => <li key={p.id}><Link to={p.url} className="underline-offset-4 hover:underline">{p.title}</Link> (solved)</li>)}
               </ul>
             )}
             {attempted.length > 0 && (
               <ul className="list-disc space-y-1 pl-5">
-                {attempted.map((p) => <li key={p.id}><Link to={p.url} className="underline-offset-4 hover:underline">{p.title}</Link> — attempted</li>)}
+                {attempted.map((p) => <li key={p.id}><Link to={p.url} className="underline-offset-4 hover:underline">{p.title}</Link> (attempted)</li>)}
               </ul>
             )}
           </CardContent>
@@ -152,11 +153,20 @@ export function ProgressDashboard() {
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, hint, value, max }: { label: string; hint?: string; value: number; max: number }) {
   return (
-    <div className="rounded-xl border p-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-2xl font-semibold tabular-nums">{value}</dd>
+    <div className="flex min-w-0 flex-col gap-2 rounded-xl border bg-card p-3 sm:p-4">
+      <dt className="text-xs leading-tight text-muted-foreground sm:text-sm">
+        {label}
+        {hint && <span className="block">{hint}</span>}
+      </dt>
+      <dd className="mt-auto space-y-2">
+        <span className="block text-xl leading-none font-semibold tabular-nums sm:text-2xl">
+          {value}
+          <span className="text-sm font-normal text-muted-foreground">/{max}</span>
+        </span>
+        <Meter value={value} max={max} label={`${label}${hint ? ` ${hint}` : ''}`} />
+      </dd>
     </div>
   )
 }
