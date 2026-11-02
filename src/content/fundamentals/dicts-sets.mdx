@@ -19,36 +19,142 @@ draft: false
 
 ## Why this matters
 
-"How many times does each word appear?", "Have I seen this number before?",
-"How many distinct values are there?" — these questions show up constantly.
-A list answers them in `O(N)` per question; a dict or set answers in `O(1)`
-on average. That often turns a timeout into an accepted solution.
+Your class just voted for class president, and you have a list of 300 ballots,
+each with one name on it. How many votes did each candidate get? Or: a teacher
+has a list of student IDs who submitted homework. Did student 2041 submit?
+
+Questions like these show up constantly in contest problems: "How many times
+does each word appear?", "Have I seen this number before?", "How many
+different values are there?"
+
+You could answer them with a list, but there's a problem with speed. To check
+whether a value is in a list, Python looks at the items **one by one** until it
+finds it, so a list of `N` items can take `N` checks per question. Do that
+inside a loop over `N` items and you are at `N × N` steps, which is the kind of
+program that runs out of time.
+
+**Dictionaries** and **sets** answer these questions almost instantly, no
+matter how many items they hold. This lesson shows how to use them and why
+they are so fast.
 
 <KeyIdea>
 If you check `x in something` inside a loop, `something` should be a **set**
-(or dict), not a list.
+(or a dict), not a list.
 </KeyIdea>
 
 ## Dictionaries
 
-A dict maps **keys** to **values**:
+Think of a class record book. You look up a student's **name** and find their
+**grade** next to it. You never search the whole book page by page; you go
+straight to the name.
+
+A **dictionary** (`dict` for short) works the same way. It stores pairs: a
+**key** (what you look up, like the name) and a **value** (what you get back,
+like the grade). You write a dict with curly braces, and each pair as
+`key: value`:
 
 ```python
-age = {"ana": 15, "ben": 16}
-age["cy"] = 14              # add
-age["ana"] += 1             # update
-print(age["ben"])           # 16
-print("dan" in age)         # False — checks keys
-print(age.get("dan", 0))    # 0 — default instead of KeyError
-for name, a in age.items():
-    print(name, a)
+grade = {"ana": 88, "ben": 92}
+print(grade["ben"])
 ```
 
-Keys must be immutable: numbers, strings, tuples. Lists can't be keys.
+Output:
+
+```text
+92
+```
+
+`grade["ben"]` means "look up the key `"ben"` and give me its value". Square
+brackets are the same ones you used for list positions, but here you put a
+**key** inside instead of a position number.
+
+Changing a dict uses the same square brackets:
+
+```python
+grade = {"ana": 88, "ben": 92}
+grade["cy"] = 85          # new key: adds a pair
+grade["ana"] += 2         # existing key: changes its value
+print(grade)
+print(len(grade))
+```
+
+Output:
+
+```text
+{'ana': 90, 'ben': 92, 'cy': 85}
+3
+```
+
+Assigning to a key that doesn't exist yet **adds** it. Assigning to a key that
+already exists **replaces** its value. A dict can never hold the same key
+twice, just as a record book has one line per student. `len` tells you how many
+pairs it holds.
+
+### Looking up a key that isn't there
+
+What happens if you ask for a name that isn't in the dict?
+
+```python
+grade = {"ana": 88, "ben": 92}
+print("dan" in grade)        # is "dan" one of the keys?
+print(grade.get("dan", 0))   # value of "dan", or 0 if missing
+print(grade["dan"])          # crashes: KeyError
+```
+
+Output:
+
+```text
+False
+0
+Traceback (most recent call last):
+  ...
+KeyError: 'dan'
+```
+
+There are three ways to handle a key that might be missing:
+
+- `"dan" in grade` checks whether `"dan"` is a **key** (it doesn't look at the
+  values) and gives `True` or `False`.
+- `grade.get("dan", 0)` returns the value if the key exists, and otherwise the
+  default you give it (here `0`). It never crashes.
+- `grade["dan"]` assumes the key exists. If it doesn't, the program stops with
+  a `KeyError`. Use this form only when you are sure the key is there.
+
+### Going through every pair
+
+To visit every pair, loop over `.items()`. Each round gives you one key and
+its value:
+
+```python
+grade = {"ana": 88, "ben": 92, "cy": 85}
+for name, g in grade.items():
+    print(name, g)
+```
+
+Output:
+
+```text
+ana 88
+ben 92
+cy 85
+```
+
+A dict remembers the order in which keys were **added**, but it doesn't sort
+them for you. When the output must be in alphabetical order, sort the keys
+yourself (you'll see this in the next section).
+
+<Callout type="note">
+**What can be a key?** Numbers, strings and tuples, but not lists. The reason:
+a dict files each key in a spot worked out from the key's contents (that's
+how it finds it so fast). A list can change after you put it in, and then the
+dict would be looking in the wrong spot. So Python only allows keys that can't
+change. If you need a list as a key, convert it with `tuple(...)` first.
+</Callout>
 
 ## Counting
 
-The most common dict job in contests:
+Counting how often each thing appears is the most common dict job in contests.
+Back to the class election: here the ballots are colours, to keep it short.
 
 <RunnableExample title="Word frequency" stdin="red blue red green blue red">
 
@@ -63,17 +169,69 @@ for w in sorted(count):          # sorted keys -> same output every time
 
 </RunnableExample>
 
-`collections.Counter` does the same in one line:
+Output:
 
-```python norun
-from collections import Counter
-count = Counter(words)
-print(count.most_common(2))      # [('red', 3), ('blue', 2)]
+```text
+blue 2
+green 1
+red 3
 ```
+
+The key line is `count[w] = count.get(w, 0) + 1`. Read it from the right:
+"look up the current count for `w`, using `0` if we've never seen it, add 1,
+and store the result back". Here is the dict growing, word by word:
+
+| Round | `w` | `count.get(w, 0)` | `count` after |
+| --- | --- | --- | --- |
+| 1 | `"red"` | `0` (new) | `{"red": 1}` |
+| 2 | `"blue"` | `0` (new) | `{"red": 1, "blue": 1}` |
+| 3 | `"red"` | `1` | `{"red": 2, "blue": 1}` |
+| 4 | `"green"` | `0` (new) | `{"red": 2, "blue": 1, "green": 1}` |
+| 5 | `"blue"` | `1` | `{"red": 2, "blue": 2, "green": 1}` |
+| 6 | `"red"` | `2` | `{"red": 3, "blue": 2, "green": 1}` |
+
+Why not just write `count[w] += 1`? Because the first time a word appears it
+isn't in the dict yet, so `count[w]` would crash with a `KeyError`. `.get`
+with a default of `0` handles the first time and every time after it.
+
+Then `sorted(count)` gives the **keys** in alphabetical order, so the program
+prints the same thing every time, which is what a judge expects.
+
+Counting is so common that Python has a ready-made tool for it,
+`collections.Counter`:
+
+```python
+from collections import Counter
+
+words = "red blue red green blue red".split()
+count = Counter(words)
+print(count["red"])
+print(count["purple"])
+print(count.most_common(2))
+```
+
+Output:
+
+```text
+3
+0
+[('red', 3), ('blue', 2)]
+```
+
+`from collections import Counter` loads `Counter` from Python's standard
+library (the tools that come with Python). `Counter(words)` does the whole
+counting loop for you. It behaves like a dict, with two handy extras: a missing
+key counts as `0` instead of crashing, and `most_common(k)` gives the `k`
+most frequent items with their counts.
 
 ## Sets
 
-A set holds **unique** values with fast membership:
+A **set** is a collection where every value appears **at most once**. Think of
+an attendance sheet: it doesn't matter how many times a student walks through
+the door, they are either on the sheet or not. Sets answer one question very
+quickly: "is this value in here?"
+
+Task: go through some numbers and report each one we've already seen.
 
 ```python
 seen = set()
@@ -81,40 +239,117 @@ for x in [3, 1, 3, 2, 1]:
     if x in seen:
         print("repeat:", x)
     seen.add(x)
-
-nums = [4, 1, 4, 2]
-print(len(set(nums)))            # 3 distinct values
-print(sorted(set(nums)))         # [1, 2, 4]
 ```
 
-Set operations work like math:
+Output:
+
+```text
+repeat: 3
+repeat: 1
+```
+
+`set()` makes an empty set and `seen.add(x)` puts `x` in it (adding a value
+that is already there changes nothing). Step by step:
+
+| `x` | `x in seen`? | `seen` after |
+| --- | --- | --- |
+| `3` | no | `{3}` |
+| `1` | no | `{1, 3}` |
+| `3` | **yes**, print it | `{1, 3}` |
+| `2` | no | `{1, 2, 3}` |
+| `1` | **yes**, print it | `{1, 2, 3}` |
+
+Turning a list into a set removes the duplicates, which makes "how many
+different values?" a one-liner:
 
 ```python
-a, b = {1, 2, 3}, {2, 3, 4}
-print(a & b, a | b, a - b)       # {2, 3} {1, 2, 3, 4} {1}
+nums = [4, 1, 4, 2]
+print(len(set(nums)))
+print(sorted(set(nums)))
 ```
 
-## Cost
+Output:
+
+```text
+3
+[1, 2, 4]
+```
+
+`set(nums)` keeps one copy of each value, `len` counts them, and `sorted` turns
+the set back into a sorted list. Sets have no order of their own, so always
+sort before printing when the order matters.
+
+### Comparing two sets
+
+Sets can be combined like groups of people. Say these students are in the chess
+club and the math club:
+
+```python
+chess_club = {"ana", "ben", "cy"}
+math_club = {"ben", "cy", "dan"}
+print(sorted(chess_club & math_club))   # in both clubs
+print(sorted(chess_club | math_club))   # in at least one club
+print(sorted(chess_club - math_club))   # in chess but not in math
+```
+
+Output:
+
+```text
+['ben', 'cy']
+['ana', 'ben', 'cy', 'dan']
+['ana']
+```
+
+`&` keeps what is in **both**, `|` combines **everything**, and `-` keeps what
+is in the first set **but not** the second.
+
+## Why are they so fast?
+
+A list stores items one after another, so finding a value means checking them
+in turn. A dict or set instead works out **where** to store each value from the
+value itself, like a library that shelves books by the first letter of the
+title. To find something, Python works out the spot again and looks only
+there. That takes about the same time whether the set holds 10 items or
+10 million.
+
+Programmers write "about the same time no matter the size" as `O(1)`, and
+"time grows with the size `N`" as `O(N)`. You'll study this notation in the
+[time complexity](/learn/algorithms/complexity) lesson; the table below is all
+you need for now.
 
 | Operation | dict / set | list |
 | --- | --- | --- |
 | `x in c` | <Complexity time="O(1)" /> average | <Complexity time="O(N)" /> |
 | add / update | <Complexity time="O(1)" /> average | `append` is O(1) |
-| sorted order | not kept — use `sorted()` | kept |
+| sorted order | not kept, use `sorted()` | kept |
+
+"Average" is there because, very rarely, many values land in the same spot and
+a lookup takes longer. In contest problems you can treat it as instant.
 
 ## Common mistakes
 
-- `d[key] += 1` on a missing key → `KeyError`. Use `d.get(key, 0) + 1`, `Counter` or `defaultdict(int)`.
-- `{}` is an empty **dict**; an empty set is `set()`.
-- Relying on set order when printing — always `sorted(...)` when the output order matters.
-- Using a list as a key — convert it to a tuple first.
+- **`d[key] += 1` on a key that isn't there yet** crashes with `KeyError`. Use
+  `d[key] = d.get(key, 0) + 1`, or a `Counter`.
+- **`{}` is an empty dict, not an empty set.** An empty set is `set()`. (With
+  values inside, `{1, 2}` is a set and `{1: "a"}` is a dict.)
+- **Printing a set or dict without sorting** when the problem wants a specific
+  order. Always use `sorted(...)` when order matters.
+- **Using a list as a key.** Lists can change, so they can't be keys. Convert to
+  a tuple first.
+- **Checking `x in my_list` inside a big loop.** Each check walks the whole
+  list. Turn the list into a set once, before the loop.
 
 ## Competition use
 
-- Frequencies → `Counter`.
-- "Is there a pair with sum T?" → for each `x`, check `T - x` in a set of earlier values: <Complexity time="O(N)" />.
-- Distinct count → `len(set(a))`.
-- Ties in "most frequent" problems: sort by `(-count, key)`.
+- **Frequencies:** `Counter`.
+- **Distinct values:** `len(set(a))`.
+- **"Is there a pair with sum `T`?"** Go through the numbers once. For each
+  `x`, the partner it needs is `T - x`; check whether that partner is in a set
+  of the numbers seen **earlier**, then add `x` to the set. With `T = 10` and
+  numbers `3 8 5 7`: at `7`, we need `3`, and `3` is already in the set, so the
+  answer is yes. That's one pass, <Complexity time="O(N)" />.
+- **Ties in "most frequent" problems:** sort by `(-count, key)`, so the highest
+  count comes first and ties go alphabetically.
 
 ## Exercises
 
@@ -127,6 +362,9 @@ Read `N` and `N` integers. Print how many different values there are.
 n = int(input())
 print(len(set(map(int, input().split()))))
 ```
+
+Read it from the inside out: split the line into pieces, turn each into an
+`int`, put them in a set (which drops duplicates), and count what's left.
 
 </Answer>
 </Exercise>
@@ -147,6 +385,10 @@ for w in input().split():
     seen.add(w)
 print(answer)
 ```
+
+`answer` starts as `"NONE"` and only changes if we find a repeat. The moment a
+word is already in `seen`, it is the first repeat, so we save it and `break`
+out of the loop.
 
 </Answer>
 </Exercise>
@@ -169,6 +411,10 @@ for x in map(int, input().split()):
 print("YES" if found else "NO")
 ```
 
+We check for the partner **before** adding `x`, so a number is never paired
+with itself. With `T = 6` and the single number `3`, the answer is correctly
+`NO`, but `3 3` gives `YES`.
+
 </Answer>
 </Exercise>
 
@@ -184,9 +430,14 @@ for ch, c in sorted(Counter(input().strip()).items()):
     print(ch, c)
 ```
 
+`Counter` on a string counts each character. `.items()` gives
+`(letter, count)` pairs, and `sorted` puts them in alphabetical order by
+letter. For `banana` this prints `a 3`, `b 1`, `n 2`.
+
 </Answer>
 </Exercise>
 
 ## Next topic
 
-Stage 2 starts with [time complexity](/learn/algorithms/complexity) — estimating whether your idea is fast enough.
+Stage 2 starts with [time complexity](/learn/algorithms/complexity): estimating
+whether your idea is fast enough.

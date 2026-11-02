@@ -36,6 +36,7 @@ Run `npm run content:check` after editing.
 ## Docs
 
 - `docs/PLAN.md` — architecture, risks, decisions, Render checklist
+- `docs/WRITING_STYLE.md` — how lessons should explain things (with `docs/WRITING_AUDIT.md`)
 - `docs/TASKS.md` — implementation tickets T0–T13
 - `CLAUDE.md` — rules for Claude Code
 

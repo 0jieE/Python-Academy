@@ -19,17 +19,40 @@ draft: false
 
 ## Why this matters
 
-Some problems are naturally described in terms of smaller versions of
-themselves: "all patterns of length `N`" = patterns of length `N − 1` plus one
-more choice. Recursion turns that description straight into code. It is also
-the doorway to backtracking, graph search and dynamic programming.
+You're standing somewhere in a long line at the school canteen and want to
+know your position. You can't see the front, so you ask the person ahead of
+you: "What's your position?" They don't know either, so they ask the person
+ahead of them, and so on. Finally the question reaches the person at the very
+front, who simply says "1". That answer travels back down the line: "I'm 2",
+"I'm 3"… until it reaches you.
+
+Notice two things. Each person solves the **same question** by asking it about
+a **slightly shorter line**. And there is one person who can answer **without
+asking anyone**: the one at the front. Without that person, the questions
+would never stop.
+
+That's **recursion**: a function that solves a problem by calling **itself**
+on a smaller version of the same problem. Some contest problems are naturally
+described this way, like "all patterns of length `N`" being "all patterns of
+length `N − 1`, each with one more choice". Recursion turns that description
+straight into code, and it is the starting point for backtracking, graph search
+and dynamic programming later in the roadmap.
 
 <KeyIdea>
-Every recursive function needs a **base case** that returns without
-recursing, and every call must move **closer** to it.
+Every recursive function needs a **base case**: an input small enough to answer
+directly, without calling itself. Every other call must move **closer** to that
+base case.
 </KeyIdea>
 
 ## The shape of a recursive function
+
+A quick reminder from [Functions](/learn/fundamentals/functions): a function
+runs its body when called, and `return` sends a value back to whoever called
+it. A recursive function is simply one whose body calls the function itself.
+
+Task: add up a list of numbers, recursively. The idea in plain words: the sum
+of the whole list is **the first number plus the sum of the rest**. And the sum
+of an empty "rest" is `0`.
 
 ```python
 def total(nums, i=0):
@@ -40,20 +63,69 @@ def total(nums, i=0):
 print(total([4, 1, 5]))         # 10
 ```
 
+Output:
+
+```text
+10
+```
+
+Line by line:
+
+- `def total(nums, i=0):` takes the list and a position `i`, meaning "add up
+  everything from position `i` to the end". `i=0` is a **default value**: if
+  the caller leaves `i` out, it starts at `0`, the whole list.
+- `if i == len(nums): return 0` is the **base case**. When `i` has moved past
+  the last position there is nothing left to add, so the answer is `0`, and no
+  further call is made.
+- `return nums[i] + total(nums, i + 1)` is the **recursive step**: the number at
+  position `i`, plus the total of everything after it. Because `i + 1` is
+  bigger than `i`, every call gets closer to the base case.
+
+Here is how `total([4, 1, 5])` unfolds. Each call can't finish until the call
+on the next line answers:
+
+```text
+total(i=0) = 4 + total(i=1)
+total(i=1) = 1 + total(i=2)
+total(i=2) = 5 + total(i=3)
+total(i=3) = 0      ← base case
+```
+
+Then the answers travel back up, just like in the canteen line:
+
+```text
+total(i=3) returns 0
+total(i=2) returns 5 + 0 = 5
+total(i=1) returns 1 + 5 = 6
+total(i=0) returns 4 + 6 = 10
+```
+
 ## The call stack
 
-Each call waits for the call it made. Python keeps these waiting calls on the
-**call stack**; `total([4, 1, 5])` is 4 calls deep. Python stops at about 1000
-levels with `RecursionError`. You can raise the limit:
+While `total(i=0)` waits for `total(i=1)` to answer, Python has to remember
+where it was and what it still needs to do. It keeps each waiting call in a
+pile called the **call stack**. Each new call goes on top of the pile; when a
+call returns, it comes off the top and the call underneath carries on. For
+`total([4, 1, 5])` the pile grows to 4 calls (`i = 0, 1, 2, 3`) and then
+shrinks back to nothing.
+
+Each waiting call uses some memory, so Python puts a limit on the pile: about
+**1000** calls deep. A deeper recursion stops with a `RecursionError`. That's a
+safety net. It usually means a base case is missing, but it also hits correct
+programs whose input is simply too long. `total` on a list of 5,000 numbers
+needs 5,001 calls and would crash.
+
+You can raise the limit:
 
 ```python norun
 import sys
 sys.setrecursionlimit(10 ** 6)
 ```
 
-Raising the limit lets the program try deeper recursion, but each level still
-uses memory, and very deep recursion can crash the interpreter. If the depth
-can reach `N = 10^5` or more, a **loop** (or your own stack list) is safer.
+This lets Python go deeper, but it doesn't make the pile free. Very deep
+recursion can still run out of memory and crash the whole program. If the
+depth can reach `N = 10^5` or more, a **loop** is safer. Here is the same sum
+without any recursion:
 
 ```python norun
 def total_loop(nums):           # same result, no recursion depth
@@ -63,9 +135,22 @@ def total_loop(nums):           # same result, no recursion depth
     return s
 ```
 
+So why use recursion at all? For simple sums, you wouldn't. Recursion earns its
+place when a problem **branches**: when each step has several choices, as in
+the next section.
+
 ## Generating all possibilities (backtracking)
 
-Recursion shines when you must try every combination. Choose, recurse, undo:
+Suppose a problem says: "From these numbers, try every possible group you can
+pick." Each number gives you a choice: **leave it out** or **take it**. With
+three numbers that's `2 × 2 × 2 = 8` possible groups (called **subsets**),
+including the empty group and the group of all three.
+
+Writing nested loops for this doesn't work, because the number of choices
+depends on the input. Recursion handles it naturally: decide about the first
+number, then let a recursive call decide about the rest. This pattern is called
+**backtracking**: make a choice, explore everything that follows from it, then
+**undo** the choice and try the other one.
 
 <RunnableExample title="All subsets" stdin="1 2 3">
 
@@ -87,20 +172,90 @@ go(0)
 
 </RunnableExample>
 
-There are `2^N` subsets, so this is <Complexity time="O(2^N · N)" /> — fine for
-`N ≤ 20`. Stopping a branch as soon as it can't succeed ("pruning") makes
-backtracking much faster in practice.
+Output:
+
+```text
+[]
+[3]
+[2]
+[2, 3]
+[1]
+[1, 3]
+[1, 2]
+[1, 2, 3]
+```
+
+How it works:
+
+- `chosen` is the group being built. Every call shares this one list.
+- `go(i)` means "decide about `nums[i]` and everything after it".
+- **Base case:** when `i == len(nums)`, every number has been decided, so
+  `chosen` is one complete subset. Print it and return.
+- `go(i + 1)` first explores every group **without** `nums[i]`.
+- `chosen.append(nums[i])` then `go(i + 1)` explores every group **with** it.
+- `chosen.pop()` removes `nums[i]` again, so the list is back to how it was
+  when this call started. Without this "undo", numbers from one branch would
+  leak into the next.
+
+To see the choices, here is the tree of calls for just two numbers, `1 2`.
+Each level decides one number; each leaf prints a subset:
+
+```text
+go(0)              chosen = []
+├─ skip 1: go(1)   chosen = []
+│  ├─ skip 2       prints []
+│  └─ take 2       prints [2]
+└─ take 1: go(1)   chosen = [1]
+   ├─ skip 2       prints [1]
+   └─ take 2       prints [1, 2]
+```
+
+After each "take" branch finishes, `pop()` removes that number again, so the
+next branch starts from the right list.
+
+With `N` numbers there are `2^N` subsets, and printing each takes up to `N`
+steps, so the whole search is <Complexity time="O(2^N · N)" />. That grows
+very fast: `2^20` is about one million, fine, but `2^40` is over a trillion.
+So backtracking is the tool for **small** `N` (up to about 20). A useful trick
+is **pruning**: as soon as a partial choice can't possibly lead to a valid
+answer, return early instead of exploring that whole branch.
 
 ## Memoization
 
-Naive Fibonacci recomputes the same values again and again — exponential time:
+The **Fibonacci numbers** start `0, 1`, and each next number is the sum of the
+two before it: `0, 1, 1, 2, 3, 5, 8, 13, …`. That definition is already
+recursive, so it's tempting to write it directly:
 
 ```python norun
 def fib(n):
     return n if n < 2 else fib(n - 1) + fib(n - 2)   # fib(35) takes seconds
 ```
 
-`functools.cache` remembers each result, so every `fib(k)` is computed once:
+`n if n < 2 else …` is a one-line `if`: for `n` equal to `0` or `1` (the base
+cases) return `n`, otherwise add the two previous Fibonacci numbers.
+
+It gives the right answers, but it is extremely slow. Look at what `fib(5)`
+calls:
+
+```text
+fib(5)
+├─ fib(4)
+│   ├─ fib(3)
+│   │   ├─ fib(2)
+│   │   └─ fib(1)
+│   └─ fib(2)
+└─ fib(3)
+    ├─ fib(2)
+    └─ fib(1)
+```
+
+(The calls below `fib(2)`, which are `fib(1)` and `fib(0)`, are left out to
+keep the tree small.) `fib(3)` is computed twice and `fib(2)` three times, and
+the waste doubles with each larger `n`. `fib(35)` makes about 30 million calls.
+
+The fix is to **remember** each answer the first time you work it out, and
+reuse it after that. This is called **memoization** (from "memo", a note to
+yourself). Python does it for you with `functools.cache`:
 
 ```python
 from functools import cache
@@ -112,22 +267,47 @@ def fib(n):
 print(fib(200))   # instant
 ```
 
-Now it's <Complexity time="O(N)" /> — this idea grows into dynamic programming.
-Arguments must be hashable (numbers, strings, tuples — not lists).
+Output:
+
+```text
+280571172992510140037611932413038677189525
+```
+
+`@cache` written on the line above `def` wraps the function in a memory. Under
+the hood it's a dictionary from arguments to answers: before running
+`fib(n)`, Python checks whether `n` is already a key and, if so, returns the
+saved answer immediately. Now each `fib(k)` is computed only once, so
+`fib(200)` takes about 200 steps. Without the cache it would need about
+`10^42` calls, far more than any computer could ever finish. That's <Complexity time="O(N)" />, and this idea grows into **dynamic
+programming** later in the roadmap.
+
+Because the memory is a dictionary, the arguments follow the same rule as
+[dictionary keys](/learn/fundamentals/dicts-sets): they must be values that
+can't change, like numbers, strings and tuples. Passing a list gives
+`TypeError: unhashable type: 'list'` ("hashable" is Python's word for "can be
+used as a dictionary key").
 
 ## Common mistakes
 
-- Missing or wrong base case → infinite recursion → `RecursionError`.
-- Forgetting to `return` the recursive result.
-- Forgetting to undo a choice (`pop`) in backtracking.
-- Passing a list to a `@cache` function → `TypeError: unhashable type`.
-- Using recursion where depth can be `10^5` without thinking about the limit.
+- **Missing or wrong base case.** The calls never stop, and Python ends the
+  program with `RecursionError`. Check that every path eventually reaches a
+  base case.
+- **Forgetting to `return` the recursive result.** Writing
+  `nums[i] + total(nums, i + 1)` without `return` computes the value and then
+  throws it away; the function returns `None`.
+- **Forgetting to undo a choice** (`pop`) in backtracking. Values from one
+  branch stay in the list and show up in the next.
+- **Passing a list to a `@cache` function.** You get
+  `TypeError: unhashable type`. Pass a tuple, or numbers, instead.
+- **Deep recursion on big inputs.** If the depth can reach `10^5`, use a loop
+  or raise the limit with care.
 
 ## Competition use
 
-- "Print all …" / "try every …" with small `N` → backtracking.
-- Recursive definitions with repeated subproblems → `@cache` (then consider a bottom-up loop).
-- Deep recursion (long chains, big trees) → convert to a loop with an explicit stack.
+- "Print all …" or "try every …" with small `N` (up to about 20): backtracking.
+- A recursive formula where the same smaller cases come up again and again:
+  add `@cache` (and later, consider rewriting it as a loop that fills a table).
+- Very deep recursion (long chains, big trees): rewrite it as a loop.
 
 ## Exercises
 
@@ -148,7 +328,12 @@ a, n = map(int, input().split())
 print(power(a, n))
 ```
 
-Only about `log2(n)` calls deep.
+The base case is `n == 0`, since anything to the power 0 is 1. Otherwise we
+compute `a^(n // 2)` **once**, store it in `half`, and square it. If `n` is
+odd, `n // 2` rounded down, so we multiply by one extra `a`. For `2^10`:
+`2^10 = (2^5)^2`, `2^5 = (2^2)^2 · 2`, `2^2 = (2^1)^2`, `2^1 = (2^0)^2 · 2`.
+Because `n` halves each time, the recursion is only about `log2(n)` calls deep:
+about 30 calls even for `n` near one billion.
 
 </Answer>
 </Exercise>
@@ -179,6 +364,13 @@ def go():
 go()
 ```
 
+This is backtracking with more than two choices per step: at each position, try
+every letter that hasn't been used yet. `used[i]` remembers which letters are
+already in `current`, and both are undone after the recursive call. Sorting the
+letters first makes the arrangements come out in alphabetical order, because we
+always try earlier letters first. For `abc` the output is `abc`, `acb`, `bac`,
+`bca`, `cab`, `cba`.
+
 </Answer>
 </Exercise>
 
@@ -202,9 +394,15 @@ r, c = map(int, input().split())
 print(paths(r, c))
 ```
 
+Your last move into the corner came either from the cell above or from the
+cell to the left, so the number of paths is the sum of those two smaller grids.
+A grid with a single row or column has exactly one path (straight along it),
+which is the base case. Without `@cache`, `paths(30, 30)` would repeat the same
+smaller grids billions of times; with it, each `(r, c)` is computed once.
+
 </Answer>
 </Exercise>
 
 ## Next topic
 
-Stage 3: [BFS and DFS](/learn/algorithms/bfs-dfs) — exploring graphs and grids.
+Stage 3: [BFS and DFS](/learn/algorithms/bfs-dfs): exploring graphs and grids.

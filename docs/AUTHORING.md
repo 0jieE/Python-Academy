@@ -1,6 +1,8 @@
 # Authoring guide
 
 How to write lessons, cheat sheets and practice problems for PyAcademy.
+For how a lesson should **sound** (voice, explaining terms, traces, output
+blocks), follow `docs/WRITING_STYLE.md`.
 Everything lives in `src/content/`. After any change run:
 
 ```bash

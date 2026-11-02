@@ -193,3 +193,12 @@ Gate for every ticket: `npm run check && npm run build`.
 - **Docs and tests:** `docs/AUTHORING.md` explains when to use `norun`. A new smoke test checks that a fragment has Copy and Edit in IDE but no Run.
 - **Verified:** `npm run check` ✔, `npm run build` ✔, `npm run test:e2e` **250 passed**. Checked in a screenshot at 360 px.
 - **Needs coach review:** the `norun` choice in each file. Some definition-only blocks (`is_prime`, `fact`, `gcd`, `sieve`) could instead get a `print(...)` line and keep Run.
+
+## 2026-11-03: Beginner-friendly writing, audit, style guide and three model lessons
+
+- **Audit:** all 20 lessons scored for how well a beginner could learn them alone (`docs/WRITING_AUDIT.md`). They are accurate but read like reference pages. Before this change no lesson traced how variables change step by step, Big-O appeared before the complexity lesson, and jargon was used without plain definitions.
+- **Style guide:** `docs/WRITING_STYLE.md` covers voice, the order for introducing an idea (situation → plain words → term → code → output → how it works → why), plain meanings for common terms, required output blocks, trace tables and call trees, and a review checklist. AUTHORING.md and README link to it.
+- **Model rewrites (for approval):** `fundamentals/loops.mdx`, `fundamentals/dicts-sets.mdx` and `algorithms/recursion.mdx`. Frontmatter, topics, objectives, exercises and difficulty are unchanged. Additions: everyday openings, refreshers with links, line-by-line explanations, real output blocks, trace tables and call trees, "why not…?" answers, edge cases, and explanations after each exercise answer. Two code changes: the multiplication-table answer uses nested loops instead of a list comprehension (comprehensions come later), and some fragments became complete runnable programs.
+- **Verified:** a script ran every runnable block in the three lessons and compared it with its Output block: 19 of 19 match. `npm run check` ✔, `npm run build` ✔, `npm run test:e2e` **250 passed**. Traces checked at 360 px (kept under ~36 characters so they don't scroll).
+- **Next, after approval:** rewrite the other 17 lessons in the order suggested in the audit.
+- **Needs coach review:** the three rewritten lessons and the style guide.

@@ -19,34 +19,110 @@ draft: false
 
 ## Why this matters
 
-Inputs in contests have many values — `N` numbers, `Q` queries, `T` test
-cases. Loops let you handle all of them with a few lines. Knowing how many
-times a loop runs also tells you whether your solution will finish in time.
+Imagine your teacher asks you to print the names of all 40 students in your
+class. You could write 40 `print` lines, but that is a lot of typing, easy to
+get wrong, and useless the day a 41st student joins. A **loop** solves this:
+you write the instruction once, and Python repeats it for every student.
+
+Contest problems are full of this kind of repetition. The input might hold `N`
+numbers, `Q` questions or `T` separate test cases, and you only learn how many
+when the program runs. With a loop, the same few lines work whether `N` is 3 or
+100,000.
+
+Loops also decide whether your program is fast enough. Every round of a loop
+takes a little time, so if you count the rounds before you start coding, you
+can tell whether your idea will finish within the time limit.
 
 <KeyIdea>
-Python does roughly **10 million simple steps per second** (often less in the
-browser). Multiply your loop sizes and compare with that before you code.
+Python does roughly **10 million simple steps per second** (often fewer in the
+browser). Before you write a loop, estimate how many times it will run and
+compare that number with 10 million.
 </KeyIdea>
 
-## for and range
+## Repeating a fixed number of times: for and range
 
-`range(n)` gives `0, 1, …, n-1`. `range(a, b)` stops **before** `b`, and
-`range(a, b, step)` jumps by `step`.
+Let's start with the simplest job: do something three times.
 
 ```python
-for i in range(5):          # 0 1 2 3 4
-    print(i)
-
-for i in range(1, 11, 3):   # 1 4 7 10
-    print(i)
-
-for i in range(10, 0, -1):  # 10 9 … 1
-    print(i)
+for i in range(3):
+    print("Round", i)
 ```
+
+Output:
+
+```text
+Round 0
+Round 1
+Round 2
+```
+
+Here is what each part means:
+
+- `range(3)` produces the numbers `0`, `1` and `2`. That is three numbers, but
+  notice that it **starts at 0** and **stops before 3**.
+- `for i in range(3):` means "take those numbers one at a time, and each time
+  call the current one `i`". The colon at the end is required, just like after
+  an `if`.
+- The indented line underneath is the **body** of the loop: the part that gets
+  repeated. Python knows which lines belong to the loop from their
+  indentation, the same way it does for `if`.
+
+One trip through the body is called an **iteration** (think "one round"). Here
+are the three rounds, step by step:
+
+| Round | `i` | Line that runs | Printed |
+| --- | --- | --- | --- |
+| 1 | `0` | `print("Round", 0)` | `Round 0` |
+| 2 | `1` | `print("Round", 1)` | `Round 1` |
+| 3 | `2` | `print("Round", 2)` | `Round 2` |
+
+After round 3, `range(3)` has no numbers left, so the loop ends and Python
+moves on to whatever comes after it.
+
+**Why does `range` start at 0?** Python counts positions from 0 (you will see
+this again with strings and lists), and starting at 0 makes `range(n)` give
+exactly `n` numbers: `0` up to `n - 1`. When you want to count the way people
+do, from 1 to `n`, give `range` a start and an end:
+
+- `range(a, b)` starts at `a` and stops **before** `b`.
+- `range(a, b, step)` jumps by `step` each time. A negative step counts down.
+
+```python
+print(list(range(1, 6)))       # start at 1, stop before 6
+print(list(range(1, 11, 3)))   # jump by 3
+print(list(range(5, 0, -1)))   # count down, stop before 0
+```
+
+Output:
+
+```text
+[1, 2, 3, 4, 5]
+[1, 4, 7, 10]
+[5, 4, 3, 2, 1]
+```
+
+`list(...)` collects all the numbers `range` produces so you can see them at
+once. Inside a `for` loop you don't need it.
+
+<Callout type="tip">
+To loop from 1 **up to and including** `n`, write `range(1, n + 1)`. A quick
+check: `range(a, b)` gives `b - a` numbers, so `range(1, n + 1)` gives `n`.
+</Callout>
 
 ## Looping over data
 
-Loop directly over a list (or string) — no index needed:
+Most of the time you won't loop over plain counting numbers. You'll loop over
+the values from the input. A `for` loop can walk straight through a list,
+handing you one value per round.
+
+As a reminder from [Input and Output](/learn/fundamentals/input-output): a
+**list** is a group of values kept in order, like `[3, 8, -2]`, and
+`list(map(int, input().split()))` reads a whole line of numbers into one.
+
+Here is a small task. A school canteen writes down its profit for each day: a
+positive number means it earned money, a negative number means it lost money.
+We want the **total profit** and the **number of good days** (days with a
+profit above 0).
 
 <RunnableExample title="Count and total" stdin={"5\n3 8 -2 7 4\n"}>
 
@@ -64,17 +140,70 @@ print(total, positives)
 
 </RunnableExample>
 
-Need the index too? Use `enumerate`:
+Output:
 
-```python norun
-for i, x in enumerate(nums):
-    print(i, x)
+```text
+20 4
 ```
+
+How it works:
+
+- The first input line says how many numbers follow. We read it into `n` to
+  get past that line, but the loop doesn't need it: `for x in nums` already
+  visits every number.
+- `total = 0` and `positives = 0` are set **before** the loop. They are
+  **running totals**: they start empty and grow a little in every round.
+- `for x in nums:` puts the first number in `x`, runs the body, then the second
+  number, and so on.
+- `total += x` is short for `total = total + x` (from
+  [Operators](/learn/fundamentals/operators)).
+- `positives += 1` only runs when `x > 0`, so it counts the good days.
+
+Watch the variables change, round by round:
+
+| Round | `x` | `total` after | `positives` after |
+| --- | --- | --- | --- |
+| 1 | `3` | `3` | `1` |
+| 2 | `8` | `11` | `2` |
+| 3 | `-2` | `9` | `2` (not a good day) |
+| 4 | `7` | `16` | `3` |
+| 5 | `4` | `20` | `4` |
+
+The `print` comes after the loop (it is not indented), so it runs once, at the
+end.
+
+<Callout type="warning">
+If you put `total = 0` **inside** the loop, it is reset to 0 every round, and
+the program prints only the last number. Running totals always start before
+the loop.
+</Callout>
+
+Sometimes you need the **position** of each value too, not just the value.
+`enumerate` gives you both:
+
+```python
+scores = [85, 92, 78]
+for i, s in enumerate(scores):
+    print(i, s)
+```
+
+Output:
+
+```text
+0 85
+1 92
+2 78
+```
+
+Each round, `enumerate` hands over a pair: the position and the value.
+`i, s` splits that pair into two variables. Positions start at 0 again; write
+`enumerate(scores, 1)` if you want to number them from 1.
 
 ## Test cases
 
-Many problems start with `T`, the number of test cases. Solve each one inside
-a loop:
+Many contest problems put several separate inputs in one file. The first line
+says how many there are, called `T` (for test cases), and each case follows on
+its own line(s). Your program answers each one in turn.
 
 <RunnableExample title="T test cases" stdin={"3\n1 2\n10 20\n-5 5\n"}>
 
@@ -87,12 +216,30 @@ for _ in range(t):
 
 </RunnableExample>
 
-`_` is a normal variable name that says "I don't use this value".
+Output:
+
+```text
+3
+30
+0
+```
+
+The loop runs `t` times (here 3). The important detail is that `input()`
+reads the **next** line each time it is called, so round 1 reads `1 2`, round 2
+reads `10 20` and round 3 reads `-5 5`. Each round prints its own answer.
+
+What about the `_`? It is an ordinary variable name. Programmers use it to say
+"I need a loop variable here, but I won't use its value". We only care that
+the loop runs `t` times, not which round we are on.
 
 ## while, break and continue
 
-`while` repeats as long as its condition is true — useful when you don't know
-the number of steps in advance:
+A `for` loop is perfect when you know how many rounds you need: one per
+student, one per number, `t` test cases. Sometimes you don't know that in
+advance. You just know when to **stop**. That's what `while` is for: it keeps
+repeating **as long as** its condition is true.
+
+Task: count how many digits a number has.
 
 ```python
 n = 12345
@@ -100,22 +247,89 @@ digits = 0
 while n > 0:
     n //= 10
     digits += 1
-print(digits)   # 5
+print(digits)
 ```
 
-- `break` leaves the loop immediately.
-- `continue` skips to the next round.
+Output:
 
-```python norun
+```text
+5
+```
+
+Before every round, Python checks `n > 0`. If it is true, the body runs; if it
+is false, the loop ends. Inside, `n //= 10` divides by 10 and drops the
+remainder (that's `//` from [Operators](/learn/fundamentals/operators)), which
+chops off the last digit. Each chop is one digit counted:
+
+| Check `n > 0` | `n` after `n //= 10` | `digits` |
+| --- | --- | --- |
+| `12345 > 0` true | `1234` | `1` |
+| `1234 > 0` true | `123` | `2` |
+| `123 > 0` true | `12` | `3` |
+| `12 > 0` true | `1` | `4` |
+| `1 > 0` true | `0` | `5` |
+| `0 > 0` false | loop ends | |
+
+Notice that something **inside** the loop (`n //= 10`) eventually makes the
+condition false. If nothing ever changes it, the loop runs forever. (The IDE
+stops a program like that when it hits the time limit.)
+
+<Callout type="note">
+A beginner question worth asking: what if `n` is `0`? The condition is false
+straight away, the loop never runs, and the program prints `0`, but `0` has
+one digit. Small edge cases like this are exactly what hidden contest tests
+check.
+</Callout>
+
+Two more words change how a loop runs:
+
+- `continue` skips the rest of **this round** and jumps to the next one.
+- `break` ends the **whole loop** immediately.
+
+Picture a teacher checking a stack of quiz papers: blank papers are skipped
+(`continue`), and a sheet marked "end" means stop checking (`break`).
+
+```python
+nums = [4, -1, 7, 0, 9]
 for x in nums:
     if x < 0:
-        continue      # ignore negatives
+        continue      # skip negative numbers
     if x == 0:
         break         # stop at the first zero
     print(x)
+print("done")
 ```
 
+Output:
+
+```text
+4
+7
+done
+```
+
+Step by step: `4` is printed. `-1` hits `continue`, so its `print` is skipped.
+`7` is printed. `0` hits `break`, so the loop ends right there and `9` is never
+looked at. `"done"` still prints because that line is after the loop, not
+inside it.
+
 ## How long does a loop take?
+
+Contest problems tell you the largest possible input in the **constraints**,
+for example "`1 ≤ N ≤ 10^5`". You can use that to predict your program's speed
+before you write it.
+
+A single loop over `N` numbers does about `N` steps. A loop **inside** another
+loop is different: for each of the `N` outer rounds, the inner loop does `N`
+rounds, so that's `N × N` steps. Comparing every student with every other
+student in a class of 40 is 1,600 steps, which is nothing. Doing the same for
+`N = 100,000` people is `10^10` steps, which at 10 million steps per second
+takes about 1,000 seconds. Far too slow.
+
+Programmers write "about `N` steps" as `O(N)` and "about `N × N` steps" as
+`O(N^2)`. You'll learn this notation properly in the
+[time complexity](/learn/algorithms/complexity) lesson. For now, use this
+table:
 
 | Constraint on N | Loops you can afford |
 | --- | --- |
@@ -123,20 +337,28 @@ for x in nums:
 | N ≤ 5000 | two nested loops <Complexity time="O(N^2)" /> (careful in Python) |
 | N ≤ 500 | three nested loops <Complexity time="O(N^3)" /> is borderline |
 
-Two nested loops over `N = 10^5` items is `10^10` steps — far too slow.
-
 ## Common mistakes
 
-- Off-by-one: `range(1, n)` stops at `n-1`. To include `n` write `range(1, n + 1)`.
-- Resetting the total **inside** the loop instead of before it.
-- `while` loops that never change their condition — they run forever (the IDE stops them at the time limit).
-- Changing a list while looping over it — loop over a copy or build a new list.
+- **Off by one.** `range(1, n)` stops at `n - 1`. To include `n`, write
+  `range(1, n + 1)`.
+- **Resetting a running total inside the loop.** Put `total = 0` before the
+  loop, or it starts over every round.
+- **A `while` loop that never ends.** Make sure something inside the loop
+  moves the condition towards false.
+- **Changing a list while looping over it.** Removing items from the list you
+  are walking through makes the loop skip values. Build a new list instead.
+- **Forgetting the indentation.** Only the indented lines repeat. A `print`
+  that should run once at the end must not be indented under the loop.
 
 ## Competition use
 
-- Read all values first, then loop.
-- Before writing nested loops, check `N` in the constraints and estimate the steps.
-- With many output lines, collect them in a list and print `"\n".join(out)` once — it is faster than many `print` calls.
+- Read all the input first, then loop over it.
+- Before writing nested loops, look at the largest `N` in the constraints and
+  estimate the number of steps.
+- When a program prints many lines, collect them in a list of strings and print
+  them once at the end with `print("\n".join(out))`, which is faster than
+  thousands of separate `print` calls. (`"\n".join(...)` glues the strings
+  together with a line break between each one.)
 
 ## Exercises
 
@@ -155,6 +377,10 @@ for x in nums:
 print(count)
 ```
 
+`x % k` is the remainder when `x` is divided by `k`. A remainder of `0` means
+`k` divides `x` exactly, so we add one to the count. `count = 0` sits before
+the loop because it is a running total.
+
 </Answer>
 </Exercise>
 
@@ -170,6 +396,12 @@ for i in range(2, n + 1):
     result *= i
 print(result)
 ```
+
+This is a running **product**, so it starts at `1` (starting at `0` would make
+everything `0`). For `N = 4` the loop multiplies by 2, 3 and 4:
+`1 → 2 → 6 → 24`. When `N` is `0` or `1`, `range(2, n + 1)` is empty, the loop
+never runs, and `1` is printed, which is correct. Python integers have no size
+limit, so even `100!` prints exactly.
 
 </Answer>
 </Exercise>
@@ -188,6 +420,10 @@ while n > 0:
 print(total)
 ```
 
+`n % 10` is the last digit and `n //= 10` removes it. For `n = 352`: add `2`
+(total 2), add `5` (total 7), add `3` (total 10), then `n` becomes `0` and the
+loop stops.
+
 </Answer>
 </Exercise>
 
@@ -200,12 +436,21 @@ Read `N` and print the `N × N` multiplication table: row `i` contains
 ```python
 n = int(input())
 for i in range(1, n + 1):
-    print(*[i * j for j in range(1, n + 1)])
+    row = []
+    for j in range(1, n + 1):
+        row.append(i * j)
+    print(*row)
 ```
+
+The outer loop picks the row number `i`; the inner loop fills that row with
+`i·1` up to `i·N`. `row.append(...)` adds a value to the end of the list, and
+`print(*row)` prints the list's values separated by spaces. The inner loop
+finishes completely for every single round of the outer loop, so this does
+`N × N` steps in total.
 
 </Answer>
 </Exercise>
 
 ## Next topic
 
-Strings — slicing, searching and building text.
+[Strings](/learn/fundamentals/strings): slicing, searching and building text.
