@@ -14,6 +14,20 @@ services:
       - path: /pagefind/*
         name: Cache-Control
         value: public, max-age=3600
+      # PWA: the browser must see a new service worker / manifest right away.
+      # sw.js precaches the build and serves offline; it updates the app.
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /manifest.webmanifest
+        name: Cache-Control
+        value: no-cache
+      - path: /manifest.webmanifest
+        name: Content-Type
+        value: application/manifest+json
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
